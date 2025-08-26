@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Instagram, Facebook, Twitter, Heart } from 'lucide-react'
 import Image from 'next/image'
-import { assets } from '../assets/assets'
+import { assets } from '@/assets/assets'
 
 export function Footer() {
   return (
@@ -12,8 +12,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
           {/* Logo and Description */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-1 mb-4">
-            <Link href="/" className="flex items-center space-x-3 group">
+            <div className="flex items-center space-x-1  mb-4">
+            <Link href="/admin" className="flex items-center space-x-3 group">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 <Image
                   src={assets.genre_bengkulu_logo}
@@ -62,9 +62,8 @@ export function Footer() {
             <ul className="space-y-3">
               {[
                 { href: '/', label: 'Beranda' },
-                { href: '/structure', label: 'Struktur' },
-                { href: '/pik-rform', label: 'Form PIK-R' },
-                { href: '/admin', label: 'Admin' }
+                { href: '/pengurus', label: 'Struktur' },
+                { href: '/pik-rform', label: 'Form' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link 
@@ -90,14 +89,20 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                <span className="text-sm">
-                  +62 xxx-xxxx-xxxx
-                </span>
+                <a
+                  href="https://wa.me/6283157664115"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 hover:underline"
+                  aria-label="Hubungi via WhatsApp +62 812-8888-8888"
+                >
+                  Nabila Putri Rasya
+                </a>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                 <span className="text-sm">
-                  info@genrebengkulu.id
+                  forumgenrekotabengkulu@gmail.com
                 </span>
               </div>
             </div>
@@ -106,24 +111,30 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+          <div className="flex flex-col md:flex-row md:justify-between items-center gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-2 text-gray-500 dark:text-gray-400 text-sm text-center md:text-left px-2">
               <span>© 2025 GenSite Bengkulu.</span>
               <span>Dibuat dengan</span>
               <Heart className="w-4 h-4 text-red-500 dark:text-red-400" />
               <span>untuk generasi masa depan</span>
             </div>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-4 text-sm px-2">
               <Link 
-                href="/admin" 
+                href="https://github.com/RayanKhairullah" 
                 className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 rayan4k
               </Link>
               <span className="text-gray-300 dark:text-gray-700">•</span>
-              <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
-                Next.js × Supabase
-              </span>
+              <div className="flex items-center space-x-2">
+                <a 
+                  href="#"
+                  className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

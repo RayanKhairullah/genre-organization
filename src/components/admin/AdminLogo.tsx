@@ -15,24 +15,28 @@ const sizeMap: Record<Size, string> = {
 
 export function AdminLogo({ size = 'md', withLink = false }: { size?: Size; withLink?: boolean }) {
   const box = sizeMap[size]
-  const logoEl = (
-    <Link href="/admin" className="flex items-center space-x-1 group">
-    <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-      <Image
-        src={assets.genre_bengkulu_logo}
-        alt="Logo Genre Kota Bengkulu"
-        className="opacity-90"
-        priority
-      />
-    </div>
-  </Link>
+  const content = (
+    <span className="transform transition-transform group-hover:scale-105 group-hover:shadow-xl">
+      <div className={`${box} rounded-xl flex items-center justify-center shadow-lg`}>
+        <Image
+          src={assets.genre_bengkulu_logo}
+          alt="Logo Genre Kota Bengkulu"
+          className="opacity-90"
+          priority
+        />
+      </div>
+    </span>
   )
   if (withLink) {
     return (
       <Link href="/admin" className="inline-flex items-center group" aria-label="Ke Dashboard Admin">
-        <span className="transform transition-transform group-hover:scale-105 group-hover:shadow-xl">{logoEl}</span>
+        {content}
       </Link>
     )
   }
-  return logoEl
+  return (
+    <div className="inline-flex items-center">
+      {content}
+    </div>
+  )
 }

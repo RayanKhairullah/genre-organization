@@ -3,13 +3,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { type Pengurus } from '@/lib/supabase'
 import Image from 'next/image'
-import { Instagram, Search, X } from 'lucide-react'
+import { Instagram, Search, X, ClipboardList } from 'lucide-react'
 
 interface OrganizationStructureProps {
   pengurus: Pengurus[]
 }
 
-export function OrganizationStructure({ pengurus }: OrganizationStructureProps) {
+export function PengurusView({ pengurus }: OrganizationStructureProps) {
   const [query, setQuery] = useState('')
   const [selectedPeriode, setSelectedPeriode] = useState<string | null>(null)
   const lastActiveElement = useRef<HTMLElement | null>(null)
@@ -25,7 +25,13 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
   }, [pengurus])
 
   const periodes = useMemo(() => Object.keys(groupedByPeriode).sort().reverse(), [groupedByPeriode])
-  const activePeriode = selectedPeriode ?? periodes[0] ?? ''
+  const activePeriode = useMemo(() => {
+    if (selectedPeriode) return selectedPeriode
+    const y = new Date().getFullYear()
+    const currentRange = `${y}-${y + 1}`
+    if (periodes.includes(currentRange)) return currentRange
+    return periodes[0] ?? ''
+  }, [selectedPeriode, periodes])
 
   // Active pengurus for periode, sorted by urutan
   const activePengurus = useMemo(() => {
@@ -51,8 +57,8 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
   const getGroup = (p: Pengurus) => {
     const ur = p.struktur_jabatan?.urutan ?? 999
     if (ur <= 4) return 'bpi'
-    if (ur >= 5 && ur <= 6) return 'bph'
-    if (ur >= 7 && ur <= 8) return 'perencanaan'
+    // Previously BPH (5–6) is now merged into 'perencanaan'
+    if (ur >= 5 && ur <= 8) return 'perencanaan'
     if (ur >= 9 && ur <= 10) return 'advokasi'
     if (ur >= 11 && ur <= 12) return 'data'
     if (ur >= 13 && ur <= 14) return 'ekonomi'
@@ -99,67 +105,81 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
         role="button"
         tabIndex={0}
         aria-label={`Detail ${person.nama}`}
-        className={`group relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 h-full`}
+        className={`group relative rounded-2xl bg-white/90 dark:bg-gray-800/80 shadow-sm hover:shadow-xl focus:shadow-xl transition-all duration-300 border border-gray-100/80 dark:border-gray-700/70 h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 flex flex-col`}
       >
         {/* Photo area: fully visible, no overlays */}
-        <div className="relative w-full h-56 sm:h-64 bg-gray-100 dark:bg-gray-900">
+        <div className="relative w-full h-56 sm:h-64 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-2xl overflow-hidden">
           <Image
             src={photo}
             alt={person.nama}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-contain object-center"
+            className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03] group-focus:scale-[1.03] group-focus-within:scale-[1.03] active:scale-[1.02]"
             onError={(e: any) => {
               try {
                 (e.currentTarget as HTMLImageElement).src = fallback
               } catch {}
             }}
           />
+          {/* subtle top shimmer */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-within:opacity-100 active:opacity-100 transition-opacity" />
+
+          {/* Hover caption overlay inside image with detailed info */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-within:opacity-100 active:opacity-100 transition-opacity duration-300">
+            {/* readability gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-white text-base leading-tight truncate">{person.nama}</h4>
+                  <p className={`text-[11px] mt-1 ${isLeadership ? 'text-yellow-300' : 'text-blue-200'} truncate`}>{roleLabel}</p>
+                </div>
+                {isLeadership && (
+                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-500/20 text-yellow-100 px-2.5 py-0.5 text-[10px] font-semibold border border-yellow-300/40 shadow-sm">Inti</span>
+                )}
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-[11px]">
+                {person.asal_pikr ? (
+                  <div className="flex items-center text-gray-200">
+                    <svg className="w-4 h-4 mr-1.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span className="truncate">{person.asal_pikr}</span>
+                  </div>
+                ) : <span />}
+
+                {person.instagram && (
+                  <a
+                    href={`https://instagram.com/${person.instagram.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-full px-2 py-0.5 bg-pink-500/20 text-pink-100 hover:bg-pink-500/30 transition-colors border border-pink-300/30"
+                  >
+                    <Instagram className="w-4 h-4 mr-1.5" />
+                    <span className="truncate">{person.instagram}</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Caption area: does not cover the image */}
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h4 className="font-semibold text-gray-900 dark:text-white text-base leading-tight truncate">{person.nama}</h4>
-              <p className={`text-xs mt-1 ${isLeadership ? 'text-yellow-700 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'} truncate`}>{roleLabel}</p>
-            </div>
-            {isLeadership && (
-              <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 text-[10px] font-semibold border border-yellow-300/60 dark:border-yellow-700/60">Inti</span>
-            )}
-          </div>
-
-          {person.jabatan_pengurus && (
-            <div className="mt-2">
-              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 rounded-full px-3 py-1 inline-block truncate">
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <h4 className="flex-1 min-w-0 font-semibold text-gray-900 dark:text-white text-base leading-tight truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 group-focus:text-blue-700 dark:group-focus:text-blue-300 group-focus-within:text-blue-700 dark:group-focus-within:text-blue-300 transition-colors">{person.nama}</h4>
+            {person.jabatan_pengurus && (
+              <span className="shrink-0 max-w-[55%] sm:max-w-[60%] truncate text-[11px] text-gray-700 dark:text-gray-200 bg-gray-50/90 dark:bg-gray-700/80 rounded-full px-3 py-1 border border-gray-200/70 dark:border-gray-600/60">
                 {person.jabatan_pengurus}
               </span>
-            </div>
-          )}
-
-          <div className="mt-3 flex items-center justify-between text-[11px]">
-            {person.asal_pikr ? (
-              <div className="flex items-center text-gray-700 dark:text-gray-300">
-                <svg className="w-4 h-4 mr-1.5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span className="truncate">{person.asal_pikr}</span>
-              </div>
-            ) : <span />}
-
-            {person.instagram && (
-              <a
-                href={`https://instagram.com/${person.instagram.replace('@', '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 transition-colors"
-              >
-                <Instagram className="w-4 h-4 mr-1.5" />
-                <span className="truncate">{person.instagram}</span>
-              </a>
             )}
           </div>
+
+          {/* No extra details here; details are shown on image hover */}
         </div>
+        {/* outer hover ring */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-blue-200/60 dark:ring-blue-800/40 transition-[ring]" />
       </div>
     )
   }
@@ -169,7 +189,7 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
       {/* Header + controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="text-left sm:text-left">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Struktur Organisasi GenRe Kota Bengkulu</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Pengurus Forum GenRe Kota Bengkulu</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Periode <span className="font-semibold text-gray-800 dark:text-gray-100">{activePeriode}</span> · <span className="text-xs text-gray-500">{filteredPengurus.length} anggota</span></p>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 dark:from-blue-500 dark:to-indigo-600 rounded-full mt-3" />
         </div>
@@ -205,6 +225,10 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
       {/* BPI */}
       {bpiMembers.length > 0 && (
         <section className="mb-10">
+          <h2 className="text-1xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+            <ClipboardList className="inline-block w-4 h-4 mr-2 align-[-2px]" />
+            BPI
+          </h2>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 text-center">🏆 BPI (Badan Pengurus Inti)</h3>
 
           {/* Ketua at centered top */}
@@ -218,29 +242,54 @@ export function OrganizationStructure({ pengurus }: OrganizationStructureProps) 
 
           {/* Other BPI members below */}
           {otherBPIMembers.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherBPIMembers.map((p) => (
-                <MemberCard key={p.id} person={p} isLeadership />
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+              {otherBPIMembers.map((p, idx) => {
+                // Stagger only the very first row under Ketua on large screens:
+                // idx 0 (left) and idx 2 (right) raised slightly; idx 1 (center) normal
+                const stagger = idx === 0 || idx === 2 ? ' lg:-mt-12' : ''
+                return (
+                  <div key={p.id} className={`h-full${stagger}`}>
+                    <MemberCard person={p} isLeadership />
+                  </div>
+                )
+              })}
             </div>
           )}
         </section>
       )}
 
-      {/* other groups */}
-      {['bph', 'perencanaan', 'advokasi', 'data', 'ekonomi', 'lainnya'].map((gKey) => (
+      {/* other groups (BPH removed) */}
+      {['perencanaan', 'advokasi', 'data', 'ekonomi', 'lainnya'].map((gKey) => (
         groups[gKey] && groups[gKey].length > 0 ? (
           <section key={gKey} className="mb-8">
+            {gKey === 'perencanaan' && (
+              <h2 className="text-1xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+                <ClipboardList className="inline-block w-4 h-4 mr-2 align-[-2px]" />
+                BPH
+              </h2>
+            )}
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 text-center">
-              {gKey === 'bph' && '📋 BPH (Badan Pengurus Harian)'}
               {gKey === 'perencanaan' && '🎯 Bidang Perencanaan dan Pengembangan'}
               {gKey === 'advokasi' && '🤝 Bidang Advokasi dan Kerja Sama'}
               {gKey === 'data' && '📊 Bidang Data dan Informasi'}
               {gKey === 'ekonomi' && '💡 Bidang Ekonomi Kreatif'}
               {gKey === 'lainnya' && '👥 Lainnya'}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {groups[gKey].map((p) => <MemberCard key={p.id} person={p} />)}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${['perencanaan','advokasi','data','ekonomi'].includes(gKey) ? 'gap-2 sm:gap-3 md:gap-4' : 'gap-6'} max-w-5xl mx-auto`}>
+              {groups[gKey].map((p, idx) => (
+                ['perencanaan','advokasi','data','ekonomi'].includes(gKey)
+                  ? (
+                      <div
+                        key={p.id}
+                        className={`w-full mx-auto sm:w-[88%] lg:w-[82%] sm:mx-0 ${idx % 2 === 0 ? 'sm:ml-auto' : 'sm:mr-auto'}`}
+                      >
+                        <MemberCard person={p} />
+                      </div>
+                    )
+                  : (
+                      <MemberCard key={p.id} person={p} />
+                    )
+              ))}
             </div>
           </section>
         ) : null

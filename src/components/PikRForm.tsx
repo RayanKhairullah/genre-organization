@@ -10,7 +10,7 @@ interface FormData {
   nama: string
   ttl: string
   asal_pikr: string
-  asal_kabupaten: string
+  alamat_lengkap: string
   tlpn: string
   email: string
   jabatan_pikr: string
@@ -22,7 +22,7 @@ export function PikRForm() {
     nama: '',
     ttl: '',
     asal_pikr: '',
-    asal_kabupaten: '',
+    alamat_lengkap: '',
     tlpn: '',
     email: '',
     jabatan_pikr: '',
@@ -59,7 +59,7 @@ export function PikRForm() {
     
     if (!formData.nama.trim()) errors.push('Nama wajib diisi')
     if (!formData.asal_pikr.trim()) errors.push('Asal PIK-R wajib diisi')
-    if (!formData.asal_kabupaten.trim()) errors.push('Asal Kabupaten wajib diisi')
+    if (!formData.alamat_lengkap.trim()) errors.push('Alamat lengkap wajib diisi')
     if (!formData.jabatan_pikr.trim()) errors.push('Jabatan PIK-R wajib diisi')
     
     if (formData.email && !validateEmail(formData.email)) {
@@ -134,7 +134,7 @@ export function PikRForm() {
           nama: formData.nama,
           ttl: formData.ttl || null,
           asal_pikr: formData.asal_pikr,
-          asal_kabupaten: formData.asal_kabupaten,
+          alamat_lengkap: formData.alamat_lengkap,
           tlpn: formData.tlpn || null,
           email: formData.email || null,
           jabatan_pikr: formData.jabatan_pikr,
@@ -150,7 +150,7 @@ export function PikRForm() {
         nama: '',
         ttl: '',
         asal_pikr: '',
-        asal_kabupaten: '',
+        alamat_lengkap: '',
         tlpn: '',
         email: '',
         jabatan_pikr: '',
@@ -179,7 +179,7 @@ export function PikRForm() {
             Formulir Pendaftaran PIK-R
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Isi formulir berikut untuk mendaftar menjadi anggota PIK-R Bengkulu
+            Isi formulir berikut untuk Pendataan anggota PIK-R Se-Kota Bengkulu
           </p>
         </div>
 
@@ -241,7 +241,7 @@ export function PikRForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label htmlFor="asal_pikr" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2.5">
-                Asal PIK-R <span className="text-red-500">*</span>
+                Asal PIK-R/PIK-M <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -255,15 +255,16 @@ export function PikRForm() {
             </div>
 
             <div>
-              <label htmlFor="asal_kabupaten" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2.5">
-                Asal Kabupaten <span className="text-red-500">*</span>
+              <label htmlFor="alamat_lengkap" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2.5">
+                Alamat Lengkap <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                id="asal_kabupaten"
-                name="asal_kabupaten"
-                value={formData.asal_kabupaten}
+                id="alamat_lengkap"
+                name="alamat_lengkap"
+                value={formData.alamat_lengkap}
                 onChange={handleInputChange}
+                placeholder="Contoh: Jl. Melati No. 12, RT 01/RW 02, Kel. Kebun Bunga, Kec. Selebar, Kota Bengkulu, Bengkulu"
                 className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
                 required
               />
@@ -306,7 +307,7 @@ export function PikRForm() {
           {/* Position Information */}
           <div>
             <label htmlFor="jabatan_pikr" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2.5">
-              Jabatan di PIK-R <span className="text-red-500">*</span>
+              Jabatan di PIK-R/PIK-M <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -364,7 +365,7 @@ export function PikRForm() {
             </div>
             
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              File akan dikompres otomatis menjadi format WebP untuk menghemat ruang penyimpanan.
+            Bukti Screenshot bisa dilihat oleh admin, jadi pastikan file yang dikirim valid.
             </p>
           </div>
 

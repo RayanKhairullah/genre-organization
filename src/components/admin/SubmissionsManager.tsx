@@ -10,7 +10,7 @@ type Submission = {
   nama: string
   ttl: string
   asal_pikr: string
-  asal_kabupaten: string
+  alamat_lengkap: string
   tlpn: string
   email: string
   jabatan_pikr: string
@@ -47,12 +47,25 @@ export function SubmissionsManager() {
   }
 
   const filteredSubmissions = useMemo(() => {
-    return submissions.filter(
-      (s) =>
-        s.nama.toLowerCase().includes(filter.toLowerCase()) ||
-        s.email.toLowerCase().includes(filter.toLowerCase()) ||
-        s.asal_pikr.toLowerCase().includes(filter.toLowerCase())
-    )
+    const q = (filter || '').trim().toLowerCase()
+    if (!q) return submissions
+
+    const safe = (v: unknown) => (typeof v === 'string' ? v : v == null ? '' : String(v))
+    const includesQ = (v: unknown) => safe(v).toLowerCase().includes(q)
+
+    return submissions.filter((s) => {
+      // Format date once for search
+      const dateStr = s.submitted_at ? new Date(s.submitted_at).toLocaleDateString('id-ID') : ''
+      return (
+        includesQ(s.nama) ||
+        includesQ(s.email) ||
+        includesQ(s.asal_pikr) ||
+        includesQ(s.tlpn) ||
+        includesQ(s.jabatan_pikr) ||
+        includesQ(s.alamat_lengkap) ||
+        includesQ(dateStr)
+      )
+    })
   }, [submissions, filter])
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,42 +105,78 @@ export function SubmissionsManager() {
     }
   }
 
-  const exportToCSV = () => {
+  const exportToExcel = async () => {
     if (filteredSubmissions.length === 0) return
 
+    // Dynamic import to avoid SSR issues and keep types flexible
+    const XLSX: any = await import('xlsx-js-style')
+
     const headers = [
-      'ID', 'Nama Lengkap', 'Tanggal Lahir', 'Asal PIK-R', 'Asal Kabupaten',
+      'ID', 'Nama Lengkap', 'Tanggal Lahir', 'Asal PIK-R', 'Alamat Lengkap',
       'No. Telepon', 'Email', 'Jabatan di PIK-R', 'URL Bukti SS', 'Waktu Pendaftaran'
     ]
-    const rows = filteredSubmissions.map(s => [
-      s.id,
-      `"${s.nama}"`,
-      `"${s.ttl}"`,
-      `"${s.asal_pikr}"`,
-      `"${s.asal_kabupaten}"`,
-      `"${s.tlpn}"`,
-      `"${s.email}"`,
-      `"${s.jabatan_pikr}"`,
-      `"${s.bukti_ss}"`,
-      `"${new Date(s.submitted_at).toLocaleString('id-ID')}"`
-    ].join(','))
 
-    const csvContent = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', `pendaftar_pik-r_${new Date().toISOString().split('T')[0]}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const data = filteredSubmissions.map((s) => [
+      s.id,
+      s.nama,
+      s.ttl,
+      s.asal_pikr,
+      s.alamat_lengkap,
+      s.tlpn,
+      s.email,
+      s.jabatan_pikr,
+      s.bukti_ss,
+      new Date(s.submitted_at).toLocaleString('id-ID')
+    ])
+
+    // Array of arrays: first row headers, then rows
+    const aoa = [headers, ...data]
+    const ws = XLSX.utils.aoa_to_sheet(aoa)
+
+    // Style header row (xlsx-js-style supports styling)
+    headers.forEach((_, idx) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: idx })
+      const cell = ws[cellRef] || { t: 's', v: headers[idx] }
+      cell.s = {
+        fill: { fgColor: { rgb: 'E6F4EA' } },
+        font: { bold: true, color: { rgb: '0B5C2B' } },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        border: {
+          top: { style: 'thin', color: { rgb: 'CCCCCC' } },
+          bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
+          left: { style: 'thin', color: { rgb: 'CCCCCC' } },
+          right: { style: 'thin', color: { rgb: 'CCCCCC' } }
+        }
+      }
+      ws[cellRef] = cell
+    })
+
+    // Auto column widths based on max length in each column
+    const colWidths = headers.map((h, c) => {
+      const maxLen = Math.max(
+        h.length,
+        ...data.map((row) => (row[c] ? String(row[c]).length : 0))
+      )
+      return { wch: Math.min(Math.max(maxLen + 2, 12), 50) }
+    })
+    ws['!cols'] = colWidths
+
+    // Add autofilter for the whole range
+    const range = XLSX.utils.decode_range(ws['!ref'])
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) }
+
+    // Create workbook and write file
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Pendaftar')
+    const filename = `pendaftar_pik-r_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, filename)
   }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div className="flex items-center gap-3 mb-4">
         <AdminLogo size="sm" />
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manajemen Pendaftar</h2>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manajemen Pendataan</h2>
       </div>
       
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
@@ -143,12 +192,12 @@ export function SubmissionsManager() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={exportToCSV}
+            onClick={exportToExcel}
             disabled={filteredSubmissions.length === 0}
             className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             <Download size={18} />
-            Export CSV
+            Export Excel
           </button>
           <button
             onClick={handleDeleteSelected}

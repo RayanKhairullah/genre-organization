@@ -1,4 +1,4 @@
--- Quick Database Setup for PIK-R System
+-- Design Database Genre System
 -- Run this ENTIRE script in your Supabase SQL Editor
 
 -- 1. Create tables (if not exists)
@@ -31,13 +31,24 @@ CREATE TABLE IF NOT EXISTS pik_r_submissions (
   nama TEXT NOT NULL,
   ttl TEXT,
   asal_pikr TEXT NOT NULL,
-  asal_kabupaten TEXT NOT NULL,
+  alamat_lengkap TEXT NOT NULL,
   tlpn TEXT,
   email TEXT,
   jabatan_pikr TEXT NOT NULL,
   bukti_ss TEXT,
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Migration helper: rename old column if present
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'pik_r_submissions' AND column_name = 'asal_kabupaten'
+  ) THEN
+    ALTER TABLE pik_r_submissions RENAME COLUMN asal_kabupaten TO alamat_lengkap;
+  END IF;
+END $$;
 
 -- Kegiatan: activities/news with up to 3 images
 CREATE TABLE IF NOT EXISTS kegiatan (
@@ -55,6 +66,27 @@ CREATE TABLE IF NOT EXISTS form_control (
   id BOOLEAN PRIMARY KEY DEFAULT TRUE,
   buka TIMESTAMP,
   tutup TIMESTAMP
+);
+
+-- Duta Genre: categories and winners
+CREATE TABLE IF NOT EXISTS duta_genre_categories (
+  id SERIAL PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  "order" INT DEFAULT 0,
+  desired_count INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS duta_genre_winners (
+  id SERIAL PRIMARY KEY,
+  category_id INT NOT NULL REFERENCES duta_genre_categories(id) ON DELETE CASCADE,
+  nama TEXT NOT NULL,
+  gender TEXT CHECK (gender IN ('putra','putri', 'duo')),
+  asal TEXT,
+  instagram TEXT,
+  image_url TEXT,
+  periode TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 2. Insert sample struktur_jabatan data
@@ -104,16 +136,36 @@ ON CONFLICT DO NOTHING;
 
 -- 4. Initialize form control
 INSERT INTO form_control (id, buka, tutup) VALUES 
-(TRUE, NOW(), NOW() + INTERVAL '30 days')
+  (TRUE, NOW(), NOW() + INTERVAL '30 days')
 ON CONFLICT (id) DO UPDATE SET
   buka = NOW(),
   tutup = NOW() + INTERVAL '30 days';
+
+-- Seed Duta Genre categories (idempotent)
+INSERT INTO duta_genre_categories (key, title, "order", desired_count) VALUES
+  ('juara_1', 'Juara Putra & Putri 1 Duta Genre', 1, 1),
+  ('juara_2', 'Juara Putra & Putri 2 Duta Genre', 2, 1),
+  ('juara_3', 'Juara Putra & Putri 3 Duta Genre', 3, 1),
+  ('harapan_1', 'Juara Harapan 1 Duta Genre', 4, 1),
+  ('harapan_2', 'Juara Harapan 2 Duta Genre', 5, 1),
+  ('innovator', 'Juara Innovator Duta Genre', 6, 1),
+  ('berbakat', 'Juara Berbakat Duta Genre', 7, 1),
+  ('terfavorit', 'Juara Terfavorit Duta Genre', 8, 1),
+  ('top_10', 'Juara Top 10 Duta Genre', 9, 2),
+  ('kelurahan_putra', 'Juara Duta Kelurahan Putra', 10, 16)
+ON CONFLICT (key) DO UPDATE SET
+  title = EXCLUDED.title,
+  "order" = EXCLUDED."order",
+  desired_count = EXCLUDED.desired_count;
 
 -- 5. Enable RLS (Row Level Security)
 ALTER TABLE struktur_jabatan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pengurus ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pik_r_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_control ENABLE ROW LEVEL SECURITY;
+ALTER TABLE duta_genre_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE duta_genre_winners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kegiatan ENABLE ROW LEVEL SECURITY;
 
 -- 6. Create policies for public access
 DROP POLICY IF EXISTS "Allow public read access on struktur_jabatan" ON struktur_jabatan;
@@ -125,8 +177,17 @@ CREATE POLICY "Allow public read access on pengurus" ON pengurus FOR SELECT USIN
 DROP POLICY IF EXISTS "Allow public read access on form_control" ON form_control;
 CREATE POLICY "Allow public read access on form_control" ON form_control FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow public read access on duta_genre_categories" ON duta_genre_categories;
+CREATE POLICY "Allow public read access on duta_genre_categories" ON duta_genre_categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public read access on duta_genre_winners" ON duta_genre_winners;
+CREATE POLICY "Allow public read access on duta_genre_winners" ON duta_genre_winners FOR SELECT USING (true);
+
 DROP POLICY IF EXISTS "Allow public insert on pik_r_submissions" ON pik_r_submissions;
 CREATE POLICY "Allow public insert on pik_r_submissions" ON pik_r_submissions FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public read access on kegiatan" ON kegiatan;
+CREATE POLICY "Allow public read access on kegiatan" ON kegiatan FOR SELECT USING (true);
 
 -- 7. Create policies for admin access
 DROP POLICY IF EXISTS "Allow authenticated users full access on struktur_jabatan" ON struktur_jabatan;
@@ -141,12 +202,30 @@ CREATE POLICY "Allow authenticated users full access on pik_r_submissions" ON pi
 DROP POLICY IF EXISTS "Allow authenticated users full access on form_control" ON form_control;
 CREATE POLICY "Allow authenticated users full access on form_control" ON form_control FOR ALL USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Allow authenticated users full access on duta_genre_categories" ON duta_genre_categories;
+CREATE POLICY "Allow authenticated users full access on duta_genre_categories" ON duta_genre_categories FOR ALL USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Allow authenticated users full access on duta_genre_winners" ON duta_genre_winners;
+CREATE POLICY "Allow authenticated users full access on duta_genre_winners" ON duta_genre_winners FOR ALL USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Allow authenticated users full access on kegiatan" ON kegiatan;
+CREATE POLICY "Allow authenticated users full access on kegiatan" ON kegiatan FOR ALL USING (auth.role() = 'authenticated');
+
 -- 8. Verify data
 SELECT 'struktur_jabatan' as table_name, COUNT(*) as count FROM struktur_jabatan
 UNION ALL
 SELECT 'pengurus' as table_name, COUNT(*) as count FROM pengurus
 UNION ALL
-SELECT 'form_control' as table_name, COUNT(*) as count FROM form_control;
+SELECT 'form_control' as table_name, COUNT(*) as count FROM form_control
+UNION ALL
+SELECT 'kegiatan' as table_name, COUNT(*) as count FROM kegiatan
+UNION ALL
+SELECT 'pik_r_submissions' as table_name, COUNT(*) as count FROM pik_r_submissions;
+
+-- Verify Duta Genre tables
+SELECT 'duta_genre_categories' as table_name, COUNT(*) as count FROM duta_genre_categories
+UNION ALL
+SELECT 'duta_genre_winners' as table_name, COUNT(*) as count FROM duta_genre_winners;
 
 -- 9. Test the join query
 SELECT 

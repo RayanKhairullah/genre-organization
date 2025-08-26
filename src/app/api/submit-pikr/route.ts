@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       nama,
       ttl,
       asal_pikr,
-      asal_kabupaten,
+      alamat_lengkap,
       tlpn,
       email,
       jabatan_pikr,
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Validate required fields
-    if (!nama || !asal_pikr || !asal_kabupaten || !jabatan_pikr) {
+    if (!nama || !asal_pikr || !alamat_lengkap || !jabatan_pikr) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         nama,
         ttl: ttl || null,
         asal_pikr,
-        asal_kabupaten,
+        alamat_lengkap,
         tlpn: tlpn || null,
         email: email || null,
         jabatan_pikr,

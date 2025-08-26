@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { assets } from '../assets/assets'
+import { assets } from '@/assets/assets'
 
 interface HeroSlide {
   id: number
@@ -28,12 +28,12 @@ const HeaderSlider: React.FC = () => {
   const heroSlides: HeroSlide[] = [
     {
       id: 1,
-      hashtag: '#GenReBengkulu',
-      title: 'GenRe Kota Bengkulu',
+      hashtag: '#ForumGenReBengkulu',
+      title: 'Forum GenRe Kota Bengkulu',
       subtitle: 'Generasi Berencana untuk Masa Depan',
-      description: 'Program yang dikembangkan untuk penyiapan kehidupan berkeluarga bagi remaja melalui pemahaman, perencanaan, dan persiapan yang matang.',
-      primaryButton: { text: 'Struktur', href: '/structure' },
-      secondaryButton: { text: 'FAQ', href: '/faq' },
+      description: 'Program BKKBN untuk kehidupan berkeluarga bagi remaja melalui pemahaman, perencanaan, dan persiapan yang matang.',
+      primaryButton: { text: 'Pengurus', href: '/pengurus' },
+      secondaryButton: { text: 'Duta Genre', href: '/duta-genre' },
       icon: (
         <Image
           src={assets.genre_bengkulu_logo}
@@ -47,12 +47,12 @@ const HeaderSlider: React.FC = () => {
     },
     {
       id: 2,
-      hashtag: '#PIKR',
+      hashtag: '#PIK-R',
       title: 'PIK-R Bengkulu',
       subtitle: 'Pusat Informasi dan Konseling Remaja',
       description: 'Wadah kegiatan program GenRe yang dikelola dari, oleh, dan untuk remaja guna memberikan pelayanan informasi dan konseling.',
       primaryButton: { text: 'Form Pik-R', href: '/pik-rform' },
-      secondaryButton: { text: 'Pelajari Lebih Lanjut', href: '#pik-r' },
+      secondaryButton: { text: 'Pelajari Lebih Lanjut', href: '#faq' },
       icon: (
         <Image
           src={assets.genre_bengkulu_logo}
@@ -71,7 +71,7 @@ const HeaderSlider: React.FC = () => {
       subtitle: 'Bersama Membangun Generasi Berencana',
       description: 'Bergabunglah dengan komunitas remaja yang peduli masa depan dan siap mempersiapkan kehidupan berkeluarga yang berkualitas.',
       primaryButton: { text: 'Kegiatan', href: '/pik-rform' },
-      secondaryButton: { text: 'Genre', href: '#faq' },
+      secondaryButton: { text: 'Duta Genre', href: '/duta-genre' },
       icon: (
         <Image
           src={assets.genre_bengkulu_logo}

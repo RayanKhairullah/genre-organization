@@ -1,15 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, FileText, Target, Award } from 'lucide-react'
+import { ArrowRight, Users, FileText, Target, Award, Crown } from 'lucide-react'
 
 const QuickLinksSection: React.FC = () => {
   const quickLinks = [
     {
-      href: "/structure",
+      href: "/pengurus",
       icon: <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />,
-      title: "Struktur Organisasi",
-      desc: "Lihat struktur organisasi GenRe Kota Bengkulu dan profil pengurus",
+      title: "Pengurus Forum",
+      desc: "Lihat struktur organisasi Forum GenRe Kota Bengkulu dan profil pengurus",
       bg: "bg-blue-100 dark:bg-blue-900",
     },
     {
@@ -20,18 +20,18 @@ const QuickLinksSection: React.FC = () => {
       bg: "bg-green-100 dark:bg-green-900",
     },
     {
+      href: "/duta-genre",
+      icon: <Crown className="w-8 h-8 text-pink-600 dark:text-pink-400" />,
+      title: "Duta Genre",
+      desc: "Informasi dan profil Duta Genre Kota Bengkulu",
+      bg: "bg-pink-100 dark:bg-pink-900",
+    },
+    {
       href: "/kegiatans",
       icon: <Target className="w-8 h-8 text-purple-600 dark:text-purple-400" />,
       title: "Kegiatan",
-      desc: "Jelajahi kegiatan GenRe Kota Bengkulu",
+      desc: "Jelajahi kegiatan Forum GenRe Kota Bengkulu",
       bg: "bg-purple-100 dark:bg-purple-900",
-    },
-    {
-      href: "/#faq",
-      icon: <Award className="w-8 h-8 text-orange-600 dark:text-orange-400" />,
-      title: "FAQ",
-      desc: "Lihat dokumentasi kegiatan dan prestasi anggota",
-      bg: "bg-orange-100 dark:bg-orange-900",
     },
   ]
 

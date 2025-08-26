@@ -177,9 +177,9 @@ export default function PikRFormPage() {
                   Informasi Kontak
                 </h3>
                 <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p>Email: info@genrebengkulu.id</p>
-                  <p>Instagram: @genrebengkulu</p>
-                  <p>Telepon: +62 xxx xxxx xxxx</p>
+                  <p>Email: forumgenrekotabengkulu@gmail.com</p>
+                  <p>Instagram: @genrekotabengkulu</p>
+                  <p>Telepon: +62 831 5766 4115</p>
                 </div>
               </div>
             </div>

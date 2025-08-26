@@ -48,6 +48,9 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
   const [pengurusForm, setPengurusForm] = useState(initialPengurusForm)
   const [strukturForm, setStrukturForm] = useState(initialStrukturForm)
   const [selectedRoleType, setSelectedRoleType] = useState<'all' | 'administrator' | 'member'>('all')
+  // Search queries
+  const [searchPengurus, setSearchPengurus] = useState('')
+  const [searchStruktur, setSearchStruktur] = useState('')
 
   const periodes = useMemo(() => {
     const allPeriodes = pengurus.map(p => p.periode).filter(Boolean) as string[]
@@ -58,8 +61,25 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
     let list = pengurus
     if (selectedPeriode !== 'all') list = list.filter(p => p.periode === selectedPeriode)
     if (selectedRoleType !== 'all') list = list.filter(p => (p.role_type ?? 'administrator') === selectedRoleType)
-    return list
-  }, [pengurus, selectedPeriode, selectedRoleType])
+    const q = searchPengurus.trim().toLowerCase()
+    if (!q) return list
+    return list.filter(p => {
+      const jabatanName = strukturJabatan.find(j => j.id === p.jabatan_id)?.nama_jabatan || ''
+      return (
+        (p.nama || '').toLowerCase().includes(q) ||
+        (p.email || '').toLowerCase().includes(q) ||
+        (p.periode || '').toLowerCase().includes(q) ||
+        jabatanName.toLowerCase().includes(q)
+      )
+    })
+  }, [pengurus, selectedPeriode, selectedRoleType, searchPengurus, strukturJabatan])
+
+  const filteredStruktur = useMemo(() => {
+    const q = searchStruktur.trim().toLowerCase()
+    let list = [...strukturJabatan]
+    if (!q) return list
+    return list.filter(s => (s.nama_jabatan || '').toLowerCase().includes(q))
+  }, [strukturJabatan, searchStruktur])
 
   const resetForms = () => {
     setPengurusForm(initialPengurusForm)
@@ -237,6 +257,13 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             </select>
             <ChevronsUpDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
+          <input
+            type="text"
+            value={searchPengurus}
+            onChange={e => setSearchPengurus(e.target.value)}
+            placeholder="Cari nama, email, jabatan..."
+            className="w-full sm:w-64 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
+          />
         </div>
         <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
           <Plus className="w-5 h-5 mr-2" /> Tambah Pengurus
@@ -282,7 +309,14 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
   const renderStrukturTab = () => (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl">
-       <div className="p-4 md:p-6 flex justify-end items-center border-b border-gray-200 dark:border-gray-700">
+       <div className="p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-200 dark:border-gray-700">
+        <input
+          type="text"
+          value={searchStruktur}
+          onChange={e => setSearchStruktur(e.target.value)}
+          placeholder="Cari nama jabatan..."
+          className="w-full sm:w-72 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
+        />
         <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
           <Plus className="w-5 h-5 mr-2" /> Tambah Jabatan
         </button>
@@ -297,7 +331,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {strukturJabatan.sort((a, b) => a.urutan - b.urutan).map(s => (
+            {filteredStruktur.sort((a, b) => a.urutan - b.urutan).map(s => (
               <tr key={s.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{s.nama_jabatan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{s.urutan}</td>
@@ -409,7 +443,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
       <div className="mb-2 flex items-center gap-3">
         <AdminLogo size="sm" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Struktur Organisasi</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Pengurus & Jabatan</h2>
       </div>
 
       {renderTabs()}

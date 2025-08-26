@@ -1,60 +1,118 @@
+/**
+ * Supabase client configuration and database utilities
+ * Centralized database connection and helper functions
+ */
+
 import { createClient } from '@supabase/supabase-js'
+import type {
+  StrukturJabatan,
+  Pengurus,
+  PikRSubmission,
+  FormControl,
+  Kegiatan,
+  DutaGenreCategory,
+  DutaGenreWinner,
+  ApiResponse
+} from '@/types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Environment validation
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables')
+}
+
+/**
+ * Supabase client instance
+ */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Types for our database tables
-export interface StrukturJabatan {
-  id: number
-  nama_jabatan: string
-  urutan: number
+/**
+ * Database helper functions
+ */
+export const db = {
+  /**
+   * Get all pengurus with their jabatan information
+   */
+  async getPengurus(): Promise<ApiResponse<Pengurus[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('pengurus')
+        .select(`
+          *,
+          struktur_jabatan (*)
+        `)
+        .order('jabatan_id', { ascending: true })
+
+      if (error) throw error
+      return { data: data || [] }
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  },
+
+  /**
+   * Get all kegiatan
+   */
+  async getKegiatan(): Promise<ApiResponse<Kegiatan[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('kegiatan')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return { data: data || [] }
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  },
+
+  /**
+   * Get form control settings
+   */
+  async getFormControl(): Promise<ApiResponse<FormControl>> {
+    try {
+      const { data, error } = await supabase
+        .from('form_control')
+        .select('*')
+        .single()
+
+      if (error) throw error
+      return { data }
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  },
+
+  /**
+   * Submit PIK-R form
+   */
+  async submitPikRForm(formData: Omit<PikRSubmission, 'id' | 'submitted_at'>): Promise<ApiResponse<PikRSubmission>> {
+    try {
+      const { data, error } = await supabase
+        .from('pik_r_submissions')
+        .insert([formData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return { data }
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
 }
 
-export interface Pengurus {
-  id: number
-  nama: string
-  ttl?: string
-  jabatan_pengurus?: string
-  asal_pikr?: string
-  tlpn?: string
-  email?: string
-  instagram?: string
-  image_url?: string
-  jabatan_id: number
-  periode: string
-  role_type?: 'administrator' | 'member'
-  struktur_jabatan?: StrukturJabatan
-}
-
-export interface PikRSubmission {
-  id: number
-  nama: string
-  ttl?: string
-  asal_pikr: string
-  asal_kabupaten: string
-  tlpn?: string
-  email?: string
-  jabatan_pikr: string
-  bukti_ss?: string
-  submitted_at: string
-}
-
-export interface FormControl {
-  id: boolean
-  buka: string | null
-  tutup: string | null
-}
-
-export interface Kegiatan {
-  id: number
-  judul: string
-  deskripsi?: string
-  tanggal?: string
-  image_url_1?: string
-  image_url_2?: string
-  image_url_3?: string
-  created_at?: string
+// Re-export types for convenience
+export type {
+  StrukturJabatan,
+  Pengurus,
+  PikRSubmission,
+  FormControl,
+  Kegiatan,
+  DutaGenreCategory,
+  DutaGenreWinner
 }
 

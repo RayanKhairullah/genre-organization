@@ -10,7 +10,7 @@ import SponsorsSection from '@/components/SponsorsSection'
 import KegiatanPreview from '@/components/KegiatanPreview'
 
 export default function Home() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',

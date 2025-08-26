@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from 'react'
 import { supabase, type Pengurus } from '@/lib/supabase'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
-import { OrganizationStructure } from '@/components/OrganizationStructure'
+import { PengurusView } from '@/components/PengurusView'
 
-export default function StructurePage() {
+export default function PengurusPage() {
   const [pengurus, setPengurus] = useState<Pengurus[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -64,7 +64,7 @@ export default function StructurePage() {
       {/* Organization Structure Content */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <OrganizationStructure pengurus={pengurus} />
+          <PengurusView pengurus={pengurus} />
         </div>
       </section>
 

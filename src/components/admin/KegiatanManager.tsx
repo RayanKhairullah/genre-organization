@@ -30,6 +30,18 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
 
   useEffect(() => setItems(kegiatan), [kegiatan])
 
+  // Search filter
+  const [query, setQuery] = useState('')
+  const filteredItems = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return items
+    return items.filter(it =>
+      (it.judul || '').toLowerCase().includes(q) ||
+      (it.deskripsi || '').toLowerCase().includes(q) ||
+      (it.tanggal || '').toLowerCase().includes(q)
+    )
+  }, [items, query])
+
   const openModal = (item?: Kegiatan) => {
     setMessage(null)
     if (item) {
@@ -147,14 +159,23 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md">
-      <div className="p-4 md:p-6 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <AdminLogo size="sm" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Kegiatan</h3>
         </div>
-        <button onClick={() => openModal()} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <Plus className="w-4 h-4" /> Tambah Kegiatan
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Cari kegiatan..."
+            className="w-full sm:w-64 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm"
+          />
+          <button onClick={() => openModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+            <Plus className="w-4 h-4" /> Tambah Kegiatan
+          </button>
+        </div>
       </div>
 
       {message && (
@@ -164,11 +185,11 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
       )}
 
       <div className="p-4 md:p-6">
-        {items.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">Belum ada kegiatan.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map(item => (
+            {filteredItems.map(item => (
               <div key={item.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold text-gray-900 dark:text-gray-100">{item.judul}</h4>
@@ -184,9 +205,9 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
                   </div>
                 )}
                 <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 mb-3">{item.deskripsi}</p>
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory -mx-1 px-1">
                   {[item.image_url_1, item.image_url_2, item.image_url_3].filter(Boolean).map((url, idx) => (
-                    <img key={idx} src={url as string} alt={item.judul} className="h-20 w-28 object-cover rounded-md border border-gray-200 dark:border-gray-700" />
+                    <img key={idx} src={url as string} alt={item.judul} className="h-16 sm:h-20 w-24 sm:w-28 object-cover rounded-md border border-gray-200 dark:border-gray-700 snap-start shrink-0" />
                   ))}
                 </div>
               </div>
@@ -197,8 +218,8 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40">
+          <div className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
               <h4 className="font-semibold text-gray-900 dark:text-gray-100">{editing ? 'Edit' : 'Tambah'} Kegiatan</h4>
               <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">✕</button>
@@ -220,16 +241,16 @@ export function KegiatanManager({ kegiatan, onUpdate }: { kegiatan: Kegiatan[]; 
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gambar (maks 3)</label>
                 <input type="file" accept="image/*" multiple onChange={handleFilesSelect} className="mt-1 w-full text-sm" />
                 {previews.length > 0 && (
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2 mt-2 overflow-x-auto snap-x snap-mandatory -mx-1 px-1">
                     {previews.map((src, i) => (
-                      <img key={i} src={src} className="h-20 w-28 object-cover rounded-md border border-gray-200 dark:border-gray-700" />
+                      <img key={i} src={src} className="h-16 sm:h-20 w-24 sm:w-28 object-cover rounded-md border border-gray-200 dark:border-gray-700 snap-start shrink-0" />
                     ))}
                   </div>
                 )}
               </div>
-              <div className="flex justify-end gap-3 mt-2">
-                <button type="button" onClick={closeModal} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700">Batal</button>
-                <button disabled={loading || uploading} type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2">
+                <button type="button" onClick={closeModal} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 w-full sm:w-auto">Batal</button>
+                <button disabled={loading || uploading} type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 w-full sm:w-auto">
                   {uploading ? 'Mengupload...' : (editing ? 'Simpan Perubahan' : 'Tambah')}
                 </button>
               </div>

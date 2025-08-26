@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     "PIK-R",
     "Kota Bengkulu",
     "Remaja",
-    "Keluarga Berencana",
+    "Generasi Berencana",
     "Pusat Informasi dan Konseling",
   ],
   alternates: {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "GenRe Kota Bengkulu",
     images: [
       {
-        url: "/globe.svg",
+        url: "/GenreBengkuluLogo.svg",
         width: 1200,
         height: 630,
         alt: "GenRe Kota Bengkulu",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     description: "Informasi resmi GenRe Kota Bengkulu: layanan PIK-R, struktur, pendaftaran, dan kegiatan.",
     images: [
       {
-        url: "/globe.svg",
+        url: "/GenreBengkuluLogo.svg",
         alt: "GenRe Kota Bengkulu",
       },
     ],
@@ -74,9 +74,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/genre-bengkulu-logo.png",
-    apple: "/genre-bengkulu-logo.png",
-  },
+    icon: "/GenreBengkuluLogo.svg",
+    apple: "/GenreBengkuluLogo.svg",
+  }
 };
 
 export default function RootLayout({
