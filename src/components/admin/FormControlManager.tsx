@@ -24,11 +24,11 @@ export function FormControlManager({ formControl, onUpdate }: FormControlManager
     try {
       const updateData = {
         buka: buka ? new Date(buka).toISOString() : null,
-        tutup: tutup ? new Date(tutup).toISOString() : null
+        tutup: tutup ? new Date(tutup).toISOString() : null,
       }
 
       // Ensure we always target the singleton row (id=1 by convention if absent)
-      const targetId = (formControl as any)?.id ?? 1
+      const targetId = formControl?.id ?? true
       const { error } = await supabase.from('form_control').upsert({ id: targetId, ...updateData })
       if (error) throw new Error(error.message)
 
@@ -45,7 +45,7 @@ export function FormControlManager({ formControl, onUpdate }: FormControlManager
 
   const handleQuickAction = (duration: '24h' | '7d' | '30d') => {
     const now = new Date()
-    let endTime = new Date(now.getTime())
+    const endTime = new Date(now.getTime())
 
     if (duration === '24h') endTime.setDate(now.getDate() + 1)
     if (duration === '7d') endTime.setDate(now.getDate() + 7)
@@ -59,7 +59,7 @@ export function FormControlManager({ formControl, onUpdate }: FormControlManager
     setLoading(true)
     setMessage(null)
     try {
-      const targetId = (formControl as any)?.id ?? 1
+      const targetId = formControl?.id ?? true
       const { error } = await supabase.from('form_control').upsert({ id: targetId, buka: null, tutup: new Date().toISOString() })
       if (error) throw new Error(error.message)
       setMessage({ type: 'success', text: 'Formulir berhasil ditutup!' })

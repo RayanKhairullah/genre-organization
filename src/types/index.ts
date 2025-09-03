@@ -53,6 +53,7 @@ export interface Kegiatan {
   image_url_2?: string
   image_url_3?: string
   created_at?: string
+  card_ratio?: 'landscape' | 'insta_4_5' | 'poster_2_3'
 }
 
 export interface DutaGenreCategory {
@@ -140,7 +141,7 @@ export interface ContactFormData {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string

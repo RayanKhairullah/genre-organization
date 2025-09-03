@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Check, AlertCircle, Upload } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { compressImageToWebP, validateEmail, validatePhone } from '@/lib/image-utils'
+import Image from 'next/image'
 
 interface FormData {
   nama: string
@@ -355,9 +356,12 @@ export function PikRForm() {
               {filePreview && (
                 <div className="mt-2">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pratinjau:</p>
-                  <img 
-                    src={filePreview} 
-                    alt="Pratinjau bukti" 
+                  <Image
+                    src={filePreview}
+                    alt="Pratinjau bukti"
+                    width={400}
+                    height={300}
+                    unoptimized
                     className="max-h-40 rounded-lg object-cover w-full border border-gray-200 dark:border-gray-700"
                   />
                 </div>

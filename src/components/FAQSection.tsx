@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { assets } from '@/assets/assets'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 
 interface FAQItem {
   id: number
@@ -104,10 +104,9 @@ const FAQSection: React.FC = () => {
           {/* FAQ Image */}
           <div className="order-1 lg:order-2 flex justify-center">
             <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
               <Image
                 src={assets.formQuestions}
-                alt="FAQ GenRe Bengkulu"
+                alt="FAQ Genbi Bengkulu"
                 width={450}
                 height={450}
                 className="relative rounded-3xl group-hover:shadow-3xl transition-all duration-500 group-hover:scale-105"

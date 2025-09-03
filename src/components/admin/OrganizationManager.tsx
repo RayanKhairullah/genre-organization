@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, Fragment, useMemo } from 'react'
-import { supabase, type StrukturJabatan, type Pengurus } from '@/lib/supabase'
-import { compressImageToWebP } from '@/lib/image-utils'
-import { Plus, Edit, Trash2, User, Users, Briefcase, UploadCloud, X, Save, ChevronsUpDown } from 'lucide-react'
+import { useState, useMemo, Fragment } from 'react'
+import Image from 'next/image'
+import { supabase, type Pengurus, type StrukturJabatan } from '@/lib/supabase'
 import { AdminLogo } from '@/components/admin/AdminLogo'
+import { compressImageToWebP } from '@/lib/image-utils'
+import { Plus, Trash2, User, Save, ChevronsUpDown, Users, Briefcase, Edit } from 'lucide-react'
 import { Dialog, Transition } from '@headlessui/react'
 
 interface OrganizationManagerProps {
@@ -76,7 +77,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
   const filteredStruktur = useMemo(() => {
     const q = searchStruktur.trim().toLowerCase()
-    let list = [...strukturJabatan]
+    const list = [...strukturJabatan]
     if (!q) return list
     return list.filter(s => (s.nama_jabatan || '').toLowerCase().includes(q))
   }, [strukturJabatan, searchStruktur])
@@ -250,7 +251,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             <ChevronsUpDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
           <div className="relative">
-            <select value={selectedRoleType} onChange={e => setSelectedRoleType(e.target.value as any)} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={selectedRoleType} onChange={e => setSelectedRoleType(e.target.value as 'all' | 'administrator' | 'member')} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="all">Semua Tipe</option>
               <option value="administrator">Administrator</option>
               <option value="member">Member</option>
@@ -285,7 +286,13 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
-                      <img className="h-10 w-10 rounded-full object-cover" src={p.image_url || `https://ui-avatars.com/api/?name=${p.nama}&background=random`} alt={p.nama} />
+                      <Image
+                        className="h-10 w-10 rounded-full object-cover"
+                        src={p.image_url || `https://ui-avatars.com/api/?name=${p.nama}&background=random`}
+                        alt={p.nama}
+                        width={40}
+                        height={40}
+                      />
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{p.nama}</div>
@@ -395,7 +402,18 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto Pengurus</label>
                         <div className="mt-1 flex items-center space-x-4">
                           <div className="flex-shrink-0 h-24 w-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                            {imagePreview ? <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" /> : <User className="h-12 w-12 text-gray-400" />}
+                            {imagePreview ? (
+                              <Image
+                                src={imagePreview}
+                                alt="Preview"
+                                width={96}
+                                height={96}
+                                className="h-full w-full object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <User className="h-12 w-12 text-gray-400" />
+                            )}
                           </div>
                           <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                             <span>{uploadingImage ? 'Mengupload...' : 'Pilih Gambar'}</span>

@@ -80,16 +80,8 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
     return m
   }, [filteredWinners])
 
-  const buildPlaceholders = (cat: DutaGenreCategory, current: DutaGenreWinner[]) => {
-    const need = Math.max(0, (cat.desiredCount ?? 0) - current.length)
-    if (need === 0) return current
-    const placeholders: DutaGenreWinner[] = Array.from({ length: need }).map((_, i) => ({
-      id: -((cat.id * 1000) + i + 1),
-      category_id: cat.id,
-      nama: 'Segera diisi',
-    }))
-    return [...current, ...placeholders]
-  }
+  // Only show real winners; do not generate placeholders
+  const buildPlaceholders = (_cat: DutaGenreCategory, current: DutaGenreWinner[]) => current
 
   const catByKey = new Map<string, DutaGenreCategory>()
   for (const c of categories) catByKey.set(c.key, c)
@@ -135,7 +127,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
           <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h4 className="font-semibold text-white text-sm sm:text-base leading-tight truncate">{w.nama}</h4>
+                <h4 className="font-semibold text-white text-sm sm:text-base leading-tight break-words whitespace-normal">{w.nama}</h4>
                 <p className="text-[11px] mt-1 text-blue-200 truncate">{cat.title}</p>
               </div>
             </div>
@@ -170,7 +162,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
         </div>
       </div>
       <div className="p-3 sm:p-4">
-        <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{w.nama}</h4>
+        <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words whitespace-normal">{w.nama}</h4>
         <p className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 mt-0.5 truncate">{cat.title}</p>
       </div>
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-blue-200/60 dark:ring-blue-800/40 transition-[ring]" />
@@ -268,7 +260,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
             .map((cat) => {
               const raw = winnersByCategory.get(cat.id) || []
               if (raw.length === 0) return null
-              const catWinners = raw
+              const catWinners = buildPlaceholders(cat, raw)
               const cols = Math.max(1, Math.min(3, catWinners.length))
               const maxWidth = cols === 1 ? '28rem' : cols === 2 ? '56rem' : '72rem'
               const smColsClass = cols === 1 ? 'sm:grid-cols-1' : cols === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'

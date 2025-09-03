@@ -34,7 +34,7 @@ export default function DutaGenrePage() {
           id: w.id,
           category_id: w.category_id,
           nama: w.nama,
-          gender: (w.gender as any) || undefined,
+          gender: w.gender || undefined,
           asal: w.asal || undefined,
           instagram: w.instagram || undefined,
           periode: w.periode || undefined,

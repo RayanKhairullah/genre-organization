@@ -62,6 +62,11 @@ CREATE TABLE IF NOT EXISTS kegiatan (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+ALTER TABLE kegiatan
+ADD COLUMN IF NOT EXISTS card_ratio TEXT
+  CHECK (card_ratio IN ('landscape', 'insta_4_5', 'poster_2_3'))
+  DEFAULT 'landscape';
+  
 CREATE TABLE IF NOT EXISTS form_control (
   id BOOLEAN PRIMARY KEY DEFAULT TRUE,
   buka TIMESTAMP,

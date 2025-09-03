@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, FileText, Target, Award, Crown } from 'lucide-react'
+import { ArrowRight, Users, FileText, Target, Award } from 'lucide-react'
 
 const QuickLinksSection: React.FC = () => {
   const quickLinks = [
@@ -21,7 +21,7 @@ const QuickLinksSection: React.FC = () => {
     },
     {
       href: "/duta-genre",
-      icon: <Crown className="w-8 h-8 text-pink-600 dark:text-pink-400" />,
+      icon: <Award className="w-8 h-8 text-pink-600 dark:text-pink-400" />,
       title: "Duta Genre",
       desc: "Informasi dan profil Duta Genre Kota Bengkulu",
       bg: "bg-pink-100 dark:bg-pink-900",

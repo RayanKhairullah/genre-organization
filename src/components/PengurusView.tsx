@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { type Pengurus } from '@/lib/supabase'
 import Image from 'next/image'
-import { Instagram, Search, X, ClipboardList } from 'lucide-react'
+import { Instagram, Search, ClipboardList } from 'lucide-react'
 
 interface OrganizationStructureProps {
   pengurus: Pengurus[]
@@ -12,8 +12,6 @@ interface OrganizationStructureProps {
 export function PengurusView({ pengurus }: OrganizationStructureProps) {
   const [query, setQuery] = useState('')
   const [selectedPeriode, setSelectedPeriode] = useState<string | null>(null)
-  const lastActiveElement = useRef<HTMLElement | null>(null)
-  const modalCloseBtnRef = useRef<HTMLButtonElement | null>(null)
 
   // Group pengurus by periode
   const groupedByPeriode = useMemo(() => {
@@ -115,7 +113,7 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03] group-focus:scale-[1.03] group-focus-within:scale-[1.03] active:scale-[1.02]"
-            onError={(e: any) => {
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               try {
                 (e.currentTarget as HTMLImageElement).src = fallback
               } catch {}

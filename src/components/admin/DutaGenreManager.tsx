@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { supabase, type DutaGenreCategory, type DutaGenreWinner } from '@/lib/supabase'
 import { AdminLogo } from '@/components/admin/AdminLogo'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { compressImageToWebP } from '@/lib/image-utils'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 
 interface Props {
   categories: DutaGenreCategory[]
@@ -16,7 +17,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
   const [cats, setCats] = useState<DutaGenreCategory[]>(categories)
   const [items, setItems] = useState<DutaGenreWinner[]>(winners)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const [activeTab, setActiveTab] = useState<'winners' | 'categories'>('winners')
 
@@ -84,7 +85,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
       setWinnerForm({
         category_id: w.category_id,
         nama: w.nama,
-        gender: (w.gender as any) || '',
+        gender: w.gender || '',
         asal: w.asal || '',
         instagram: w.instagram || '',
         periode: w.periode,
@@ -143,7 +144,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
       const payload: Partial<DutaGenreWinner> = {
         category_id: winnerForm.category_id,
         nama: winnerForm.nama.trim(),
-        gender: (winnerForm.gender || undefined) as any,
+        gender: winnerForm.gender || undefined,
         asal: winnerForm.asal?.trim() || undefined,
         instagram: winnerForm.instagram?.trim() || undefined,
         image_url: finalImage || undefined,
@@ -196,7 +197,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
     setMessage(null)
     if (c) {
       setEditingCat(c)
-      setCatForm({ key: c.key, title: c.title, order: (c.order as any) || 0, desired_count: c.desired_count || 0 })
+      setCatForm({ key: c.key, title: c.title, order: c.order || 0, desired_count: c.desired_count || 0 })
     } else {
       setEditingCat(null)
       setCatForm(initialCatForm)
@@ -216,7 +217,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
         title: catForm.title.trim(),
         order: Number(catForm.order) || 0,
         desired_count: Number(catForm.desired_count) || 0,
-      } as any
+      }
       if (!payload.key) throw new Error('Key kategori wajib diisi')
       if (!payload.title) throw new Error('Judul kategori wajib diisi')
 
@@ -356,7 +357,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
           </div>
           <div className="p-4 md:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCategories.sort((a,b)=> ((a.order as any)||0)-((b.order as any)||0)).map(c => (
+              {filteredCategories.sort((a,b)=> (a.order||0)-(b.order||0)).map(c => (
                 <div key={c.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
                   <div className="flex items-start justify-between mb-2">
                     <div>
@@ -419,7 +420,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                     return (
                       <select
                         value={winnerForm.gender}
-                        onChange={e=> setWinnerForm({...winnerForm, gender: (e.target.value as any)})}
+                        onChange={e=> setWinnerForm({...winnerForm, gender: e.target.value as 'putra' | 'putri' | 'duo' | ''})}
                         className="mt-1 w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                       >
                         <option value="">-</option>
@@ -445,9 +446,9 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                   className="mt-1 w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                 />
                 {winnerForm.gender === 'duo' ? (
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Pisahkan 2 akun dengan spasi, koma, garis miring, atau |. Contoh: "@akun1 @akun2"</p>
+                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Pisahkan 2 akun dengan spasi, koma, garis miring, atau |. Contoh: &quot;@akun1 @akun2&quot;</p>
                 ) : (
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Contoh: "@akun"</p>
+                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Contoh: &quot;@akun&quot;</p>
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -458,7 +459,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                 <div>
                   <label className="block text-sm font-medium">Gambar</label>
                   <input type="file" accept="image/*" onChange={handleImageSelect} className="mt-1 w-full text-sm" />
-                  {preview && <img src={preview} className="mt-2 h-24 w-32 object-cover rounded-md border border-gray-200 dark:border-gray-700" />}
+                  {preview && <Image src={preview} alt="Preview gambar" width={128} height={96} unoptimized className="mt-2 h-24 w-32 object-cover rounded-md border border-gray-200 dark:border-gray-700" />}
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2">

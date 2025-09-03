@@ -108,8 +108,8 @@ export function SubmissionsManager() {
   const exportToExcel = async () => {
     if (filteredSubmissions.length === 0) return
 
-    // Dynamic import to avoid SSR issues and keep types flexible
-    const XLSX: any = await import('xlsx-js-style')
+    // Dynamic import to avoid SSR issues; let TS infer from our module declaration
+    const XLSX = await import('xlsx-js-style')
 
     const headers = [
       'ID', 'Nama Lengkap', 'Tanggal Lahir', 'Asal PIK-R', 'Alamat Lengkap',
