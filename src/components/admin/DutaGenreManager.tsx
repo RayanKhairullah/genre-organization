@@ -6,6 +6,7 @@ import { supabase, type DutaGenreCategory, type DutaGenreWinner } from '@/lib/su
 import { AdminLogo } from '@/components/admin/AdminLogo'
 import { compressImageToWebP } from '@/lib/image-utils'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
+import XLSX from 'xlsx-js-style'
 
 interface Props {
   categories: DutaGenreCategory[]
@@ -20,6 +21,9 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
   const [, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const [activeTab, setActiveTab] = useState<'winners' | 'categories'>('winners')
+  // Multi-select state
+  const [selectedWinnerIds, setSelectedWinnerIds] = useState<Set<number>>(new Set())
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<number>>(new Set())
 
   useEffect(() => setCats(categories), [categories])
   useEffect(() => setItems(winners), [winners])
@@ -55,6 +59,137 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
       (c.title || '').toLowerCase().includes(q)
     )
   }, [categories, searchCategories])
+
+  // Export helpers — Winners
+  const buildWinnerRows = () => {
+    const header = ['ID', 'Nama', 'Kategori', 'Gender', 'Asal', 'Instagram', 'Periode', 'Gambar']
+    const rows = filteredItems.map(w => {
+      const cat = categories.find(c => c.id === w.category_id)
+      return [
+        w.id,
+        w.nama || '',
+        cat?.title || '',
+        w.gender || '',
+        w.asal || '',
+        w.instagram || '',
+        w.periode || '',
+        w.image_url || '',
+      ]
+    })
+    return { header, rows }
+  }
+
+  const exportWinnersCSV = () => {
+    const { header, rows } = buildWinnerRows()
+    const csvLines = [header, ...rows].map(r => r.map(cell => {
+      const v = String(cell ?? '')
+      if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"'
+      return v
+    }).join(','))
+    const csvContent = '\ufeff' + csvLines.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `duta_winners_${periodeFilter || 'all'}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const exportWinnersXLSX = () => {
+    const { header, rows } = buildWinnerRows()
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
+    XLSX.utils.book_append_sheet(wb, ws, 'Winners')
+    XLSX.writeFile(wb, `duta_winners_${periodeFilter || 'all'}.xlsx`)
+  }
+
+  // Export helpers — Categories
+  const buildCategoryRows = () => {
+    const header = ['ID', 'Key', 'Judul', 'Urutan', 'Target Kartu']
+    const rows = filteredCategories.map(c => [
+      c.id,
+      c.key,
+      c.title,
+      c.order ?? 0,
+      c.desired_count ?? 0,
+    ])
+    return { header, rows }
+  }
+
+  const exportCategoriesCSV = () => {
+    const { header, rows } = buildCategoryRows()
+    const csvLines = [header, ...rows].map(r => r.map(cell => {
+      const v = String(cell ?? '')
+      if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"'
+      return v
+    }).join(','))
+    const csvContent = '\ufeff' + csvLines.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'duta_categories.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const exportCategoriesXLSX = () => {
+    const { header, rows } = buildCategoryRows()
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
+    XLSX.utils.book_append_sheet(wb, ws, 'Categories')
+    XLSX.writeFile(wb, 'duta_categories.xlsx')
+  }
+
+  // Selection helpers - Winners
+  const isWinnerSelected = (id: number) => selectedWinnerIds.has(id)
+  const toggleWinnerSelect = (id: number) => {
+    setSelectedWinnerIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const toggleWinnersSelectAll = () => {
+    if (selectedWinnerIds.size === filteredItems.length) setSelectedWinnerIds(new Set())
+    else setSelectedWinnerIds(new Set(filteredItems.map(i => i.id)))
+  }
+
+  // Selection helpers - Categories
+  const isCategorySelected = (id: number) => selectedCategoryIds.has(id)
+  const toggleCategorySelect = (id: number) => {
+    setSelectedCategoryIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const toggleCategoriesSelectAll = () => {
+    if (selectedCategoryIds.size === filteredCategories.length) setSelectedCategoryIds(new Set())
+    else setSelectedCategoryIds(new Set(filteredCategories.map(c => c.id)))
+  }
+
+  const bulkDelete = async (target: 'winners' | 'categories') => {
+    const ids = target === 'winners' ? Array.from(selectedWinnerIds) : Array.from(selectedCategoryIds)
+    if (!ids.length) return
+    const label = target === 'winners' ? 'pemenang' : 'kategori'
+    if (!confirm(`Hapus ${ids.length} ${label} terpilih? Tindakan ini tidak dapat dibatalkan.`)) return
+    try {
+      setLoading(true)
+      const table = target === 'winners' ? 'duta_genre_winners' : 'duta_genre_categories'
+      const { error } = await supabase.from(table).delete().in('id', ids)
+      if (error) throw new Error(error.message)
+      setMessage({ type: 'success', text: `${ids.length} ${label} dihapus.` })
+      if (target === 'winners') setSelectedWinnerIds(new Set()); else setSelectedCategoryIds(new Set())
+      onUpdate()
+    } catch (err) {
+      console.error(err)
+      setMessage({ type: 'error', text: (err as Error).message || 'Gagal menghapus' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const periodOptions = useMemo(() => {
     const all = [...items.map(i => i.periode), periodeFilter || '2024-2025']
@@ -277,7 +412,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
           <div className="p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
               <AdminLogo size="sm" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Pemenang Duta GenRe</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Duta GenRe</h3>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <select value={periodeFilter} onChange={e => setPeriodeFilter(e.target.value)} className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm">
@@ -296,39 +431,79 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                 placeholder="Cari nama, asal, periode, kategori..."
                 className="w-full sm:w-72 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm"
               />
+              
+              <div className="flex items-center gap-2">
+                <button onClick={exportWinnersCSV} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">Export CSV</button>
+                <button onClick={exportWinnersXLSX} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">Export XLSX</button>
+              </div>
+              {selectedWinnerIds.size > 0 && (
+                <button onClick={() => bulkDelete('winners')} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
+                  <Trash2 className="w-4 h-4" /> Hapus Terpilih ({selectedWinnerIds.size})
+                </button>
+              )}
               <button onClick={() => openWinnerModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4" /> Tambah Pemenang
               </button>
             </div>
           </div>
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-6 overflow-x-auto">
             {filteredItems.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">Belum ada pemenang.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredItems.map(w => {
-                  const category = cats.find(c => c.id === w.category_id)
-                  return (
-                    <div key={w.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">{w.nama}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{category?.title || 'Tanpa kategori'}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openWinnerModal(w)} className="p-1.5 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => deleteWinner(w.id)} className="p-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300 flex gap-2 flex-wrap">
-                        {w.gender && <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">{w.gender}</span>}
-                        {w.asal && <span className="px-2 py-0.5 rounded bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200">{w.asal}</span>}
-                        <span className="px-2 py-0.5 rounded bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200">{w.periode}</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700/50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50">
+                      <input
+                        type="checkbox"
+                        aria-label="Pilih semua pemenang"
+                        checked={filteredItems.length > 0 && selectedWinnerIds.size === filteredItems.length}
+                        onChange={toggleWinnersSelectAll}
+                      />
+                    </th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Foto</th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama</th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategori</th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Gender</th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Asal</th>
+                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Periode</th>
+                    <th scope="col" className="relative px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50"><span className="sr-only">Aksi</span></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredItems.map(w => {
+                    const category = cats.find(c => c.id === w.category_id)
+                    return (
+                      <tr key={w.id}>
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            aria-label={`Pilih ${w.nama}`}
+                            checked={isWinnerSelected(w.id)}
+                            onChange={() => toggleWinnerSelect(w.id)}
+                          />
+                        </td>
+                        <td className="px-6 py-4 hidden sm:table-cell">
+                          {w.image_url ? (
+                            <Image src={w.image_url} alt={w.nama} width={40} height={40} className="h-10 w-10 rounded object-cover" />
+                          ) : (
+                            <div className="h-10 w-10 rounded bg-gray-100 dark:bg-gray-800" />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words min-w-[160px]">{w.nama}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-normal break-words min-w-[140px]">{category?.title || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.gender || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.asal || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.periode || '-'}</td>
+                        <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                          <button onClick={() => openWinnerModal(w)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Pencil className="h-5 w-5" /></button>
+                          <button onClick={() => deleteWinner(w.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Trash2 className="h-5 w-5" /></button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
@@ -350,28 +525,63 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                 placeholder="Cari key atau judul kategori..."
                 className="w-full sm:w-72 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm"
               />
+              
+              <div className="flex items-center gap-2">
+                <button onClick={exportCategoriesCSV} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">Export CSV</button>
+                <button onClick={exportCategoriesXLSX} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">Export XLSX</button>
+              </div>
+              {selectedCategoryIds.size > 0 && (
+                <button onClick={() => bulkDelete('categories')} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
+                  <Trash2 className="w-4 h-4" /> Hapus Terpilih ({selectedCategoryIds.size})
+                </button>
+              )}
               <button onClick={() => openCatModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4" /> Tambah Kategori
               </button>
             </div>
           </div>
-          <div className="p-4 md:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCategories.sort((a,b)=> (a.order||0)-(b.order||0)).map(c => (
-                <div key={c.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{c.title}</h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Key: {c.key} · Urutan: {c.order ?? 0} · Target kartu: {c.desired_count ?? 0}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => openCatModal(c)} className="p-1.5 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => deleteCategory(c.id)} className="p-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="p-4 md:p-6 overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50">
+                    <input
+                      type="checkbox"
+                      aria-label="Pilih semua kategori"
+                      checked={filteredCategories.length > 0 && selectedCategoryIds.size === filteredCategories.length}
+                      onChange={toggleCategoriesSelectAll}
+                    />
+                  </th>
+                  <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Judul</th>
+                  <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Key</th>
+                  <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Urutan</th>
+                  <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Target Kartu</th>
+                  <th scope="col" className="relative px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50"><span className="sr-only">Aksi</span></th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredCategories.sort((a,b)=> (a.order||0)-(b.order||0)).map(c => (
+                  <tr key={c.id}>
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        aria-label={`Pilih kategori ${c.title}`}
+                        checked={isCategorySelected(c.id)}
+                        onChange={() => toggleCategorySelect(c.id)}
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words min-w-[160px]">{c.title}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-normal break-words">{c.key}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{c.order ?? 0}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{c.desired_count ?? 0}</td>
+                    <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                      <button onClick={() => openCatModal(c)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Pencil className="h-5 w-5" /></button>
+                      <button onClick={() => deleteCategory(c.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Trash2 className="h-5 w-5" /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

@@ -8,6 +8,7 @@ import FAQSection from '@/components/FAQSection'
 import PIKRSection from '@/components/PIKRSection'
 import SponsorsSection from '@/components/SponsorsSection'
 import KegiatanPreview from '@/components/KegiatanPreview'
+import DutaGenreFAQSection from '@/components/DutaGenreFAQSection'
 
 export default function Home() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
@@ -49,6 +50,9 @@ export default function Home() {
 
       {/* FAQ Section */}
       <FAQSection />
+
+      {/* Duta Genre FAQ Section */}
+      <DutaGenreFAQSection />
 
       {/* PIK-R Section */}
       <PIKRSection />

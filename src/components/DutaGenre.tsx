@@ -34,6 +34,8 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
   // Filters
   const [query, setQuery] = useState('')
   const [selectedPeriode, setSelectedPeriode] = useState<string | null>(null)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all')
+  const [genderFilter, setGenderFilter] = useState<'all' | 'putra' | 'putri' | 'duo'>('all')
   // Toggle overlay details on tap/click for mobile usability
   const [openOverlayId, setOpenOverlayId] = useState<number | null>(null)
 
@@ -61,13 +63,15 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
     const q = query.trim().toLowerCase()
     return winners
       .filter(w => (activePeriode ? (w.periode === activePeriode) : true))
+      .filter(w => (selectedCategoryId === 'all' ? true : w.category_id === selectedCategoryId))
+      .filter(w => (genderFilter === 'all' ? true : (w.gender === genderFilter)))
       .filter(w => {
         if (!q) return true
         const catTitle = catById.get(w.category_id)?.title || ''
         const hay = `${w.nama} ${catTitle} ${w.asal ?? ''} ${w.instagram ?? ''}`.toLowerCase()
         return hay.includes(q)
       })
-  }, [winners, activePeriode, query, catById])
+  }, [winners, activePeriode, query, catById, selectedCategoryId, genderFilter])
 
   // Group filtered winners by category
   const winnersByCategory = useMemo(() => {
@@ -235,6 +239,39 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
               {periodes.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
+            </select>
+          </div>
+
+          <div className="mt-2 sm:mt-0 sm:ml-3">
+            <label className="sr-only" htmlFor="category-select">Pilih Kategori</label>
+            <select
+              id="category-select"
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+              className="px-3 py-2 text-sm rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm"
+            >
+              <option value="all">Semua Kategori</option>
+              {categories
+                .slice()
+                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                .map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+            </select>
+          </div>
+
+          <div className="mt-2 sm:mt-0 sm:ml-3">
+            <label className="sr-only" htmlFor="gender-select">Pilih Gender</label>
+            <select
+              id="gender-select"
+              value={genderFilter}
+              onChange={(e) => setGenderFilter(e.target.value as 'all' | 'putra' | 'putri' | 'duo')}
+              className="px-3 py-2 text-sm rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm"
+            >
+              <option value="all">Semua Gender</option>
+              <option value="putra">Putra</option>
+              <option value="putri">Putri</option>
+              <option value="duo">Duo</option>
             </select>
           </div>
         </div>

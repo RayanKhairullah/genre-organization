@@ -95,10 +95,21 @@ const HeaderSlider: React.FC = () => {
   }, [heroSlides.length])
 
   return (
-    <div className="py-8 md:py-4 bg-white dark:bg-gray-900">
+    <div className="relative py-8 md:py-4 overflow-hidden">
+      {/* Background image */}
+      <Image
+        src={assets.genrebackground}
+        alt="Background"
+        fill
+        priority
+        className="object-cover object-center dark:opacity-100 select-none pointer-events-none"
+      />
+      {/* Readability overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 via-white/30 to-white/30 dark:from-gray-900/80 dark:via-gray-900/70 dark:to-gray-900/80" />
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Gunakan min-h untuk memastikan ruang yang cukup untuk konten */}
-        <div className="min-h-[380px] md:min-h-[520px] flex items-center">
+        <div className="min-h-[440px] md:min-h-[600px] flex items-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={heroSlides[currentSlide].id}
@@ -157,9 +168,7 @@ const HeaderSlider: React.FC = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 layout // Penting untuk animasi layout yang smooth [[4]]
               >
-                <div className="p-3 md:p-5 bg-gray-50 dark:bg-gray-900 rounded-2xl max-w-[300px] w-full">
-                  {heroSlides[currentSlide].icon}
-                </div>
+                {heroSlides[currentSlide].icon}
               </motion.div>
             </motion.div>
           </AnimatePresence>

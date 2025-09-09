@@ -7,6 +7,7 @@ import { AdminLogo } from '@/components/admin/AdminLogo'
 import { compressImageToWebP } from '@/lib/image-utils'
 import { Plus, Trash2, User, Save, ChevronsUpDown, Users, Briefcase, Edit } from 'lucide-react'
 import { Dialog, Transition } from '@headlessui/react'
+import XLSX from 'xlsx-js-style'
 
 interface OrganizationManagerProps {
   pengurus: Pengurus[]
@@ -24,6 +25,9 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [selectedPeriode, setSelectedPeriode] = useState<string>('all')
+  // Multi-select state
+  const [selectedPengurusIds, setSelectedPengurusIds] = useState<Set<number>>(new Set())
+  const [selectedStrukturIds, setSelectedStrukturIds] = useState<Set<number>>(new Set())
 
   const defaultPeriode = new Date().getFullYear().toString()
 
@@ -75,12 +79,136 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
     })
   }, [pengurus, selectedPeriode, selectedRoleType, searchPengurus, strukturJabatan])
 
+  // Export helpers for Pengurus
+  const buildPengurusRows = () => {
+    const header = [
+      'ID', 'Nama', 'TTL', 'Jabatan', 'Asal PIK-R', 'Telepon', 'Email', 'Instagram', 'Periode', 'Tipe'
+    ]
+    const rows = filteredPengurus.map(p => [
+      p.id,
+      p.nama || '',
+      p.ttl || '',
+      strukturJabatan.find(j => j.id === p.jabatan_id)?.nama_jabatan || '',
+      p.asal_pikr || '',
+      p.tlpn || '',
+      p.email || '',
+      p.instagram || '',
+      p.periode || '',
+      p.role_type || 'administrator',
+    ])
+    return { header, rows }
+  }
+
+  const exportPengurusCSV = () => {
+    const { header, rows } = buildPengurusRows()
+    const csvLines = [header, ...rows].map(r => r.map(cell => {
+      const v = String(cell ?? '')
+      if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"'
+      return v
+    }).join(','))
+    const csvContent = '\ufeff' + csvLines.join('\n') // BOM for Excel
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const periodLabel = selectedPeriode === 'all' ? 'semua' : selectedPeriode
+    a.download = `pengurus_${periodLabel}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const exportPengurusXLSX = () => {
+    const { header, rows } = buildPengurusRows()
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
+    XLSX.utils.book_append_sheet(wb, ws, 'Pengurus')
+    const periodLabel = selectedPeriode === 'all' ? 'semua' : selectedPeriode
+    XLSX.writeFile(wb, `pengurus_${periodLabel}.xlsx`)
+  }
+
   const filteredStruktur = useMemo(() => {
     const q = searchStruktur.trim().toLowerCase()
     const list = [...strukturJabatan]
     if (!q) return list
     return list.filter(s => (s.nama_jabatan || '').toLowerCase().includes(q))
   }, [strukturJabatan, searchStruktur])
+
+  // Selection helpers - Pengurus
+  const isPengurusSelected = (id: number) => selectedPengurusIds.has(id)
+  const togglePengurusSelect = (id: number) => {
+    setSelectedPengurusIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const togglePengurusSelectAll = () => {
+    if (selectedPengurusIds.size === filteredPengurus.length) {
+      setSelectedPengurusIds(new Set())
+    } else {
+      setSelectedPengurusIds(new Set(filteredPengurus.map(p => p.id)))
+    }
+  }
+
+  // Selection helpers - Struktur
+  const isStrukturSelected = (id: number) => selectedStrukturIds.has(id)
+  const toggleStrukturSelect = (id: number) => {
+    setSelectedStrukturIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const toggleStrukturSelectAll = () => {
+    if (selectedStrukturIds.size === filteredStruktur.length) {
+      setSelectedStrukturIds(new Set())
+    } else {
+      setSelectedStrukturIds(new Set(filteredStruktur.map(s => s.id)))
+    }
+  }
+
+  // Bulk delete handler
+  const handleBulkDelete = async (target: 'pengurus' | 'struktur', mode: 'selected' | 'all') => {
+    const table = target === 'pengurus' ? 'pengurus' : 'struktur_jabatan'
+    let ids: number[] = []
+    if (target === 'pengurus') {
+      ids = mode === 'selected' ? Array.from(selectedPengurusIds) : filteredPengurus.map(p => p.id)
+    } else {
+      const rawIds = mode === 'selected' ? Array.from(selectedStrukturIds) : filteredStruktur.map(s => s.id)
+      // Protect Struktur rows that are referenced by pengurus
+      const nonDeletable = new Set(pengurus.map(p => p.jabatan_id))
+      const deletable = rawIds.filter(id => !nonDeletable.has(id))
+      ids = deletable
+      if (rawIds.length && deletable.length < rawIds.length) {
+        setMessage({ type: 'error', text: 'Beberapa jabatan tidak dapat dihapus karena sedang dipakai oleh pengurus.' })
+      }
+    }
+
+    if (!ids.length) {
+      setMessage({ type: 'error', text: 'Tidak ada item yang dipilih untuk dihapus.' })
+      return
+    }
+
+    const label = mode === 'selected' ? 'terpilih' : 'pada tampilan (filter) ini'
+    if (!confirm(`Hapus ${ids.length} item ${label} dari ${table}? Tindakan ini tidak dapat dibatalkan.`)) return
+
+    setLoading(true)
+    setMessage(null)
+    try {
+      const { error } = await supabase.from(table).delete().in('id', ids)
+      if (error) throw new Error(error.message)
+      setMessage({ type: 'success', text: `${ids.length} item berhasil dihapus.` })
+      if (target === 'pengurus') setSelectedPengurusIds(new Set())
+      else setSelectedStrukturIds(new Set())
+      onUpdate()
+    } catch (error) {
+      console.error(`Bulk delete error (${table}):`, error)
+      const msg = error instanceof Error ? error.message : 'Gagal menghapus data.'
+      setMessage({ type: 'error', text: msg })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const resetForms = () => {
     setPengurusForm(initialPengurusForm)
@@ -265,15 +393,47 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             placeholder="Cari nama, email, jabatan..."
             className="w-full sm:w-64 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
           />
+          <div className="flex items-center gap-2">
+            <button onClick={exportPengurusCSV} className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Export CSV</button>
+            <button onClick={exportPengurusXLSX} className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Export XLSX</button>
+          </div>
         </div>
-        <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-          <Plus className="w-5 h-5 mr-2" /> Tambah Pengurus
-        </button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {selectedPengurusIds.size > 0 && (
+            <button
+              onClick={() => handleBulkDelete('pengurus', 'selected')}
+              className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Hapus Terpilih ({selectedPengurusIds.size})
+            </button>
+          )}
+          {false && filteredPengurus.length > 0 && (
+            <button
+              onClick={() => handleBulkDelete('pengurus', 'all')}
+              className="flex items-center px-3 py-2 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 rounded-lg hover:bg-red-100 text-sm"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Hapus Semua (Filter)
+            </button>
+          )}
+          <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <Plus className="w-5 h-5 mr-2" /> Tambah Pengurus
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
+              <th scope="col" className="px-6 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Pilih semua pengurus"
+                  checked={filteredPengurus.length > 0 && selectedPengurusIds.size === filteredPengurus.length}
+                  onChange={togglePengurusSelectAll}
+                />
+              </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama</th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jabatan</th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Periode</th>
@@ -283,6 +443,14 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {filteredPengurus.map(p => (
               <tr key={p.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    aria-label={`Pilih ${p.nama}`}
+                    checked={isPengurusSelected(p.id)}
+                    onChange={() => togglePengurusSelect(p.id)}
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
@@ -324,14 +492,33 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
           placeholder="Cari nama jabatan..."
           className="w-full sm:w-72 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
         />
-        <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-          <Plus className="w-5 h-5 mr-2" /> Tambah Jabatan
-        </button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {selectedStrukturIds.size > 0 && (
+            <button
+              onClick={() => handleBulkDelete('struktur', 'selected')}
+              className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Hapus Terpilih ({selectedStrukturIds.size})
+            </button>
+          )}
+          <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <Plus className="w-5 h-5 mr-2" /> Tambah Jabatan
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
+              <th scope="col" className="px-6 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Pilih semua jabatan"
+                  checked={filteredStruktur.length > 0 && selectedStrukturIds.size === filteredStruktur.length}
+                  onChange={toggleStrukturSelectAll}
+                />
+              </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama Jabatan</th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Urutan</th>
               <th scope="col" className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
@@ -340,6 +527,14 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {filteredStruktur.sort((a, b) => a.urutan - b.urutan).map(s => (
               <tr key={s.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    aria-label={`Pilih jabatan ${s.nama_jabatan}`}
+                    checked={isStrukturSelected(s.id)}
+                    onChange={() => toggleStrukturSelect(s.id)}
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{s.nama_jabatan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{s.urutan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -351,6 +546,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
           </tbody>
         </table>
       </div>
+      {/* Removed bottom bulk actions to keep UI consistent with Pengurus toolbar */}
     </div>
   )
 

@@ -2,6 +2,8 @@
  * Consolidated TypeScript types for GenRe Kota Bengkulu application
  */
 
+import type { StaticImageData } from 'next/image'
+
 // Database Types
 export interface StrukturJabatan {
   id: number
@@ -119,12 +121,13 @@ export interface NavItem {
 
 // Asset Types
 export interface AssetCollection {
-  formQuestions: string
-  genre_bengkulu_logo: string
-  peach: string
-  specialrainbow: string
-  strawberry: string
-  vanilla: string
+  formQuestions: string | StaticImageData
+  genre_bengkulu_logo: string | StaticImageData
+  genrebackground: string | StaticImageData
+  peach: string | StaticImageData
+  specialrainbow: string | StaticImageData
+  strawberry: string | StaticImageData
+  vanilla: string | StaticImageData
   drink: string
   drink2: string
   faq_image: string

@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import { type Pengurus } from '@/lib/supabase'
 import Image from 'next/image'
 import { Instagram, Search, ClipboardList } from 'lucide-react'
+import XLSX from 'xlsx-js-style'
 
 interface OrganizationStructureProps {
   pengurus: Pengurus[]
@@ -50,6 +51,48 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
       return hay.includes(q)
     })
   }, [activePengurus, query])
+
+  // Export helpers
+  const buildRows = () => {
+    const header = ['ID', 'Nama', 'TTL', 'Jabatan', 'Asal PIK-R', 'Telepon', 'Email', 'Instagram', 'Periode']
+    const rows = filteredPengurus.map(p => [
+      p.id,
+      p.nama || '',
+      p.ttl || '',
+      p.struktur_jabatan?.nama_jabatan || '',
+      p.asal_pikr || '',
+      p.tlpn || '',
+      p.email || '',
+      p.instagram || '',
+      p.periode || '',
+    ])
+    return { header, rows }
+  }
+
+  const exportCSV = () => {
+    const { header, rows } = buildRows()
+    const csvLines = [header, ...rows].map(r => r.map(cell => {
+      const v = String(cell ?? '')
+      if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"'
+      return v
+    }).join(','))
+    const csvContent = '\ufeff' + csvLines.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `pengurus_${activePeriode || 'semua'}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const exportXLSX = () => {
+    const { header, rows } = buildRows()
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
+    XLSX.utils.book_append_sheet(wb, ws, 'Pengurus')
+    XLSX.writeFile(wb, `pengurus_${activePeriode || 'semua'}.xlsx`)
+  }
 
   // Small groups (BPI, BPH, etc.) — keep original rules
   const getGroup = (p: Pengurus) => {
@@ -216,6 +259,11 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>
+          </div>
+
+          <div className="mt-2 sm:mt-0 sm:ml-3 flex items-center gap-2">
+            <button onClick={exportCSV} className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">Export CSV</button>
+            <button onClick={exportXLSX} className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">Export XLSX</button>
           </div>
         </div>
       </div>
