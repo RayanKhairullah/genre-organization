@@ -42,8 +42,8 @@ export function Navigation() {
                 priority
               />
             </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-              Forum GenRe Kota Bengkulu
+            <span className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300">
+              GenRe Kota Bengkulu
             </span>
           </Link>
 
@@ -55,13 +55,13 @@ export function Navigation() {
                 href={item.href}
                 className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                   isActive(item.href)
-                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50'
+                    ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 shadow-sm'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50'
                 }`}
               >
                 {item.label}
                 {isActive(item.href) && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-red-600 dark:bg-red-400 rounded-full" />
                 )}
               </Link>
             ))}
@@ -95,8 +95,8 @@ export function Navigation() {
                   onClick={() => setIsOpen(false)}
                   className={`block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                     isActive(item.href)
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50'
+                      ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50'
                   }`}
                 >
                   {item.label}

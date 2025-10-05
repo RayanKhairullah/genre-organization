@@ -44,7 +44,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
         const cat = categories.find(c => c.id === i.category_id)
         return (
           (i.nama || '').toLowerCase().includes(q) ||
-          (i.asal || '').toLowerCase().includes(q) ||
           (i.periode || '').toLowerCase().includes(q) ||
           (cat?.title || '').toLowerCase().includes(q)
         )
@@ -62,7 +61,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
 
   // Export helpers — Winners
   const buildWinnerRows = () => {
-    const header = ['ID', 'Nama', 'Kategori', 'Gender', 'Asal', 'Instagram', 'Periode', 'Gambar']
+    const header = ['ID', 'Nama', 'Kategori', 'Gender', 'Instagram', 'Periode', 'Gambar']
     const rows = filteredItems.map(w => {
       const cat = categories.find(c => c.id === w.category_id)
       return [
@@ -70,7 +69,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
         w.nama || '',
         cat?.title || '',
         w.gender || '',
-        w.asal || '',
         w.instagram || '',
         w.periode || '',
         w.image_url || '',
@@ -203,7 +201,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
     category_id: 0,
     nama: '',
     gender: '' as '' | 'putra' | 'putri' | 'duo',
-    asal: '',
     instagram: '',
     periode: '2024-2025',
     image_url: '',
@@ -221,7 +218,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
         category_id: w.category_id,
         nama: w.nama,
         gender: w.gender || '',
-        asal: w.asal || '',
         instagram: w.instagram || '',
         periode: w.periode,
         image_url: w.image_url || '',
@@ -280,7 +276,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
         category_id: winnerForm.category_id,
         nama: winnerForm.nama.trim(),
         gender: winnerForm.gender || undefined,
-        asal: winnerForm.asal?.trim() || undefined,
         instagram: winnerForm.instagram?.trim() || undefined,
         image_url: finalImage || undefined,
         periode: winnerForm.periode,
@@ -428,7 +423,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                 type="text"
                 value={searchWinners}
                 onChange={e => setSearchWinners(e.target.value)}
-                placeholder="Cari nama, asal, periode, kategori..."
+                placeholder="Cari nama, periode, kategori..."
                 className="w-full sm:w-72 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm"
               />
               
@@ -441,7 +436,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                   <Trash2 className="w-4 h-4" /> Hapus Terpilih ({selectedWinnerIds.size})
                 </button>
               )}
-              <button onClick={() => openWinnerModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+              <button onClick={() => openWinnerModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4" /> Tambah Pemenang
               </button>
             </div>
@@ -465,7 +460,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                     <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama</th>
                     <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategori</th>
                     <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Gender</th>
-                    <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Asal</th>
+                    
                     <th scope="col" className="px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Periode</th>
                     <th scope="col" className="relative px-6 py-3 sticky top-0 z-10 bg-gray-50 dark:bg-gray-700/50"><span className="sr-only">Aksi</span></th>
                   </tr>
@@ -493,10 +488,10 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words min-w-[160px]">{w.nama}</td>
                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-normal break-words min-w-[140px]">{category?.title || '-'}</td>
                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.gender || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.asal || '-'}</td>
+                        
                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{w.periode || '-'}</td>
                         <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
-                          <button onClick={() => openWinnerModal(w)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Pencil className="h-5 w-5" /></button>
+                          <button onClick={() => openWinnerModal(w)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Pencil className="h-5 w-5" /></button>
                           <button onClick={() => deleteWinner(w.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Trash2 className="h-5 w-5" /></button>
                         </td>
                       </tr>
@@ -535,7 +530,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                   <Trash2 className="w-4 h-4" /> Hapus Terpilih ({selectedCategoryIds.size})
                 </button>
               )}
-              <button onClick={() => openCatModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+              <button onClick={() => openCatModal()} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4" /> Tambah Kategori
               </button>
             </div>
@@ -575,7 +570,7 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{c.order ?? 0}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">{c.desired_count ?? 0}</td>
                     <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
-                      <button onClick={() => openCatModal(c)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Pencil className="h-5 w-5" /></button>
+                      <button onClick={() => openCatModal(c)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Pencil className="h-5 w-5" /></button>
                       <button onClick={() => deleteCategory(c.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Trash2 className="h-5 w-5" /></button>
                     </td>
                   </tr>
@@ -640,10 +635,6 @@ export function DutaGenreManager({ categories, winners, onUpdate }: Props) {
                       </select>
                     )
                   })()}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Asal</label>
-                  <input type="text" value={winnerForm.asal} onChange={e=> setWinnerForm({...winnerForm, asal: e.target.value})} className="mt-1 w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-800 dark:border-gray-700" />
                 </div>
               </div>
               <div>

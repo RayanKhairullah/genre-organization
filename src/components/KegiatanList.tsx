@@ -51,7 +51,7 @@ function KegiatanCard({ item }: { item: Kegiatan }) {
   return (
     <Link
       href={`/kegiatans?id=${item.id}`}
-      className="group cursor-pointer break-inside-avoid mb-4 md:mb-5 lg:mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 block"
+      className="group cursor-pointer break-inside-avoid mb-4 md:mb-5 lg:mb-6 focus:outline-none focus:ring-2 focus:ring-red-500 block"
       aria-label={`Buka detail kegiatan ${item.judul}`}
     >
       {/* Slider with chosen aspect ratio */}
@@ -69,7 +69,7 @@ function KegiatanCard({ item }: { item: Kegiatan }) {
             <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
               <h4 className="text-white font-semibold text-sm sm:text-base leading-tight line-clamp-2">{item.judul}</h4>
               {item.tanggal && (
-                <p className="text-[11px] text-blue-200 mt-1">{item.tanggal}</p>
+                <p className="text-[11px] text-red-200 mt-1">{item.tanggal}</p>
               )}
             </div>
           </div>
@@ -163,20 +163,23 @@ export default function KegiatanList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500" />
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-red-200 dark:border-red-900 border-t-red-600 dark:border-t-red-500" />
       </div>
     )
   }
 
   if (error) {
-    return <p className="text-center text-sm text-red-600 dark:text-red-400">{error}</p>
+    return (
+      <p className="text-center text-sm text-red-600 dark:text-red-400">{error}</p>
+    )
   }
 
   if (items.length === 0) {
-    return <p className="text-center text-sm text-gray-600 dark:text-gray-300">Belum ada kegiatan.</p>
+    return (
+      <p className="text-center text-sm text-gray-600 dark:text-gray-300">Belum ada kegiatan.</p>
+    )
   }
 
-  // Filter by a single date (same day). If tanggal tidak valid, item tetap ditampilkan.
   const filteredItems = items.filter((it) => {
     if (!filterDate) return true
     if (!it.tanggal) return true

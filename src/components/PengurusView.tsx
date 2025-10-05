@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react'
 import { type Pengurus } from '@/lib/supabase'
 import Image from 'next/image'
 import { Instagram, Search, ClipboardList } from 'lucide-react'
-import XLSX from 'xlsx-js-style'
 
 interface OrganizationStructureProps {
   pengurus: Pengurus[]
@@ -47,52 +46,10 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
     const q = query.trim().toLowerCase()
     if (!q) return activePengurus
     return activePengurus.filter((p) => {
-      const hay = `${p.nama} ${p.struktur_jabatan?.nama_jabatan ?? ''} ${p.jabatan_pengurus ?? ''}`.toLowerCase()
+      const hay = `${p.nama} ${p.struktur_jabatan?.nama_jabatan ?? ''}`.toLowerCase()
       return hay.includes(q)
     })
   }, [activePengurus, query])
-
-  // Export helpers
-  const buildRows = () => {
-    const header = ['ID', 'Nama', 'TTL', 'Jabatan', 'Asal PIK-R', 'Telepon', 'Email', 'Instagram', 'Periode']
-    const rows = filteredPengurus.map(p => [
-      p.id,
-      p.nama || '',
-      p.ttl || '',
-      p.struktur_jabatan?.nama_jabatan || '',
-      p.asal_pikr || '',
-      p.tlpn || '',
-      p.email || '',
-      p.instagram || '',
-      p.periode || '',
-    ])
-    return { header, rows }
-  }
-
-  const exportCSV = () => {
-    const { header, rows } = buildRows()
-    const csvLines = [header, ...rows].map(r => r.map(cell => {
-      const v = String(cell ?? '')
-      if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"'
-      return v
-    }).join(','))
-    const csvContent = '\ufeff' + csvLines.join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `pengurus_${activePeriode || 'semua'}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const exportXLSX = () => {
-    const { header, rows } = buildRows()
-    const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.aoa_to_sheet([header, ...rows])
-    XLSX.utils.book_append_sheet(wb, ws, 'Pengurus')
-    XLSX.writeFile(wb, `pengurus_${activePeriode || 'semua'}.xlsx`)
-  }
 
   // Small groups (BPI, BPH, etc.) — keep original rules
   const getGroup = (p: Pengurus) => {
@@ -122,7 +79,7 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
 
   if (pengurus.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl shadow-lg p-8">
+      <div className="bg-gradient-to-br from-red-50 to-gray-100 rounded-2xl shadow-lg p-8">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +103,7 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
         role="button"
         tabIndex={0}
         aria-label={`Detail ${person.nama}`}
-        className={`group relative rounded-2xl bg-white/90 dark:bg-gray-800/80 shadow-sm hover:shadow-xl focus:shadow-xl transition-all duration-300 border border-gray-100/80 dark:border-gray-700/70 h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 flex flex-col`}
+        className={`group relative rounded-2xl bg-white/90 dark:bg-gray-800/80 shadow-sm hover:shadow-xl focus:shadow-xl transition-all duration-300 border border-gray-100/80 dark:border-gray-700/70 h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 flex flex-col`}
       >
         {/* Photo area: fully visible, no overlays */}
         <div className="relative w-full h-56 sm:h-64 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-2xl overflow-hidden">
@@ -163,7 +120,7 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
             }}
           />
           {/* subtle top shimmer */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-blue-400/40 to-transparent opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-within:opacity-100 active:opacity-100 transition-opacity" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-red-400/40 to-transparent opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-within:opacity-100 active:opacity-100 transition-opacity" />
 
           {/* Hover caption overlay inside image with detailed info */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus:opacity-100 group-focus-within:opacity-100 active:opacity-100 transition-opacity duration-300">
@@ -173,23 +130,14 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h4 className="font-semibold text-white text-base leading-tight truncate">{person.nama}</h4>
-                  <p className={`text-[11px] mt-1 ${isLeadership ? 'text-yellow-300' : 'text-blue-200'} truncate`}>{roleLabel}</p>
+                  <p className={`text-[11px] mt-1 ${isLeadership ? 'text-yellow-300' : 'text-red-200'} truncate`}>{roleLabel}</p>
                 </div>
                 {isLeadership && (
                   <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-500/20 text-yellow-100 px-2.5 py-0.5 text-[10px] font-semibold border border-yellow-300/40 shadow-sm">Inti</span>
                 )}
               </div>
 
-              <div className="mt-2 flex items-center justify-between text-[11px]">
-                {person.asal_pikr ? (
-                  <div className="flex items-center text-gray-200">
-                    <svg className="w-4 h-4 mr-1.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <span className="truncate">{person.asal_pikr}</span>
-                  </div>
-                ) : <span />}
-
+              <div className="mt-2 flex items-center justify-end text-[11px]">
                 {person.instagram && (
                   <a
                     href={`https://instagram.com/${person.instagram.replace('@', '')}`}
@@ -209,30 +157,25 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
         {/* Caption area: does not cover the image */}
         <div className="p-4 flex-1 flex flex-col">
           <div className="flex items-center gap-2 sm:gap-3">
-            <h4 className="flex-1 min-w-0 font-semibold text-gray-900 dark:text-white text-base leading-tight truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 group-focus:text-blue-700 dark:group-focus:text-blue-300 group-focus-within:text-blue-700 dark:group-focus-within:text-blue-300 transition-colors">{person.nama}</h4>
-            {person.jabatan_pengurus && (
-              <span className="shrink-0 max-w-[55%] sm:max-w-[60%] truncate text-[11px] text-gray-700 dark:text-gray-200 bg-gray-50/90 dark:bg-gray-700/80 rounded-full px-3 py-1 border border-gray-200/70 dark:border-gray-600/60">
-                {person.jabatan_pengurus}
-              </span>
-            )}
+            <h4 className="flex-1 min-w-0 font-semibold text-gray-900 dark:text-white text-base leading-tight truncate group-hover:text-red-700 dark:group-hover:text-red-300 group-focus:text-red-700 dark:group-focus:text-red-300 group-focus-within:text-red-700 dark:group-focus-within:text-red-300 transition-colors">{person.nama}</h4>
           </div>
 
           {/* No extra details here; details are shown on image hover */}
         </div>
         {/* outer hover ring */}
-        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-blue-200/60 dark:ring-blue-800/40 transition-[ring]" />
+        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-red-200/60 dark:ring-red-800/40 transition-[ring]" />
       </div>
     )
   }
 
   return (
-    <div className="from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg dark:shadow-2xl px-4 py-6 sm:p-8 transition-colors duration-300">
+    <div className="from-red-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg dark:shadow-2xl px-4 py-6 sm:p-8 transition-colors duration-300">
       {/* Header + controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="text-left sm:text-left">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Pengurus Forum GenRe Kota Bengkulu</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Periode <span className="font-semibold text-gray-800 dark:text-gray-100">{activePeriode}</span> · <span className="text-xs text-gray-500">{filteredPengurus.length} anggota</span></p>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 dark:from-blue-500 dark:to-indigo-600 rounded-full mt-3" />
+          <div className="w-24 h-1 bg-gradient-to-r from-red-400 to-red-600 dark:from-red-500 dark:to-red-600 rounded-full mt-3" />
         </div>
 
         <div className="flex-1 sm:flex-initial flex flex-col sm:flex-row items-stretch gap-3 w-full sm:w-auto">
@@ -259,11 +202,6 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>
-          </div>
-
-          <div className="mt-2 sm:mt-0 sm:ml-3 flex items-center gap-2">
-            <button onClick={exportCSV} className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">Export CSV</button>
-            <button onClick={exportXLSX} className="px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">Export XLSX</button>
           </div>
         </div>
       </div>

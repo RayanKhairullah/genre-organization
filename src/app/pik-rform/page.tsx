@@ -76,7 +76,7 @@ export default function PikRFormPage() {
             </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Form Pendaftaran PIK-R
+            Form Pendataan PIK-R
           </h1>
           <p className="text-xl text-green-100 max-w-3xl mx-auto">
             Bergabunglah dengan Pusat Informasi dan Konseling Remaja untuk mendapatkan akses ke berbagai program dan layanan
@@ -164,24 +164,12 @@ export default function PikRFormPage() {
                 <AlertTriangle className="w-12 h-12 text-gray-400 dark:text-gray-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Formulir Pendaftaran Ditutup
+                Formulir Pendataan Ditutup
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                Formulir pendaftaran PIK-R saat ini sedang ditutup. Silakan periksa jadwal pembukaan 
+                Formulir Pendataan PIK-R saat ini sedang ditutup. Silakan periksa jadwal pembukaan 
                 atau hubungi admin untuk informasi lebih lanjut.
               </p>
-              
-              {/* Contact Information */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 max-w-md mx-auto">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                  Informasi Kontak
-                </h3>
-                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p>Email: forumgenrekotabengkulu@gmail.com</p>
-                  <p>Instagram: @genrekotabengkulu</p>
-                  <p>Telepon: +62 831 5766 4115</p>
-                </div>
-              </div>
             </div>
           )}
         </div>

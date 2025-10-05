@@ -33,11 +33,6 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
   const initialPengurusForm = {
     nama: '',
-    ttl: '',
-    jabatan_pengurus: '',
-    asal_pikr: '',
-    tlpn: '',
-    email: '',
     instagram: '',
     image_url: '',
     jabatan_id: '',
@@ -72,7 +67,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
       const jabatanName = strukturJabatan.find(j => j.id === p.jabatan_id)?.nama_jabatan || ''
       return (
         (p.nama || '').toLowerCase().includes(q) ||
-        (p.email || '').toLowerCase().includes(q) ||
+        (p.instagram || '').toLowerCase().includes(q) ||
         (p.periode || '').toLowerCase().includes(q) ||
         jabatanName.toLowerCase().includes(q)
       )
@@ -82,16 +77,12 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
   // Export helpers for Pengurus
   const buildPengurusRows = () => {
     const header = [
-      'ID', 'Nama', 'TTL', 'Jabatan', 'Asal PIK-R', 'Telepon', 'Email', 'Instagram', 'Periode', 'Tipe'
+      'ID', 'Nama', 'Jabatan', 'Instagram', 'Periode', 'Tipe'
     ]
     const rows = filteredPengurus.map(p => [
       p.id,
       p.nama || '',
-      p.ttl || '',
       strukturJabatan.find(j => j.id === p.jabatan_id)?.nama_jabatan || '',
-      p.asal_pikr || '',
-      p.tlpn || '',
-      p.email || '',
       p.instagram || '',
       p.periode || '',
       p.role_type || 'administrator',
@@ -228,11 +219,6 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
           ...initialPengurusForm,
           ...item,
           jabatan_id: item.jabatan_id.toString(),
-          ttl: item.ttl || '',
-          jabatan_pengurus: item.jabatan_pengurus || '',
-          asal_pikr: item.asal_pikr || '',
-          tlpn: item.tlpn || '',
-          email: item.email || '',
           instagram: item.instagram || '',
           image_url: item.image_url || '',
           role_type: (item.role_type as 'administrator' | 'member') || 'administrator',
@@ -358,10 +344,10 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
   const renderTabs = () => (
     <div className="border-b border-gray-200 dark:border-gray-700">
       <nav className="-mb-px flex space-x-6">
-        <button onClick={() => setActiveTab('pengurus')} className={`flex items-center space-x-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'pengurus' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600'}`}>
+        <button onClick={() => setActiveTab('pengurus')} className={`flex items-center space-x-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'pengurus' ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600'}`}>
           <Users className="h-5 w-5" /> <span>Data Pengurus</span>
         </button>
-        <button onClick={() => setActiveTab('struktur')} className={`flex items-center space-x-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'struktur' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600'}`}>
+        <button onClick={() => setActiveTab('struktur')} className={`flex items-center space-x-2 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'struktur' ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600'}`}>
           <Briefcase className="h-5 w-5" /> <span>Struktur Jabatan</span>
         </button>
       </nav>
@@ -379,7 +365,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             <ChevronsUpDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
           <div className="relative">
-            <select value={selectedRoleType} onChange={e => setSelectedRoleType(e.target.value as 'all' | 'administrator' | 'member')} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={selectedRoleType} onChange={e => setSelectedRoleType(e.target.value as 'all' | 'administrator' | 'member')} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
               <option value="all">Semua Tipe</option>
               <option value="administrator">Administrator</option>
               <option value="member">Member</option>
@@ -390,7 +376,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
             type="text"
             value={searchPengurus}
             onChange={e => setSearchPengurus(e.target.value)}
-            placeholder="Cari nama, email, jabatan..."
+            placeholder="Cari nama, instagram, jabatan..."
             className="w-full sm:w-64 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
           />
           <div className="flex items-center gap-2">
@@ -417,7 +403,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
               <Trash2 className="w-4 h-4 mr-2" /> Hapus Semua (Filter)
             </button>
           )}
-          <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+          <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <Plus className="w-5 h-5 mr-2" /> Tambah Pengurus
           </button>
         </div>
@@ -464,14 +450,14 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{p.nama}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{p.email}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{p.instagram}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{strukturJabatan.find(j => j.id === p.jabatan_id)?.nama_jabatan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{p.periode}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  <button onClick={() => openModal(p)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Edit className="h-5 w-5" /></button>
+                  <button onClick={() => openModal(p)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Edit className="h-5 w-5" /></button>
                   <button onClick={() => handleDelete(p.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Trash2 className="h-5 w-5" /></button>
                 </td>
               </tr>
@@ -502,7 +488,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
               <Trash2 className="w-4 h-4 mr-2" /> Hapus Terpilih ({selectedStrukturIds.size})
             </button>
           )}
-          <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+          <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <Plus className="w-5 h-5 mr-2" /> Tambah Jabatan
           </button>
         </div>
@@ -538,7 +524,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{s.nama_jabatan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{s.urutan}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  <button onClick={() => openModal(s)} className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"><Edit className="h-5 w-5" /></button>
+                  <button onClick={() => openModal(s)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><Edit className="h-5 w-5" /></button>
                   <button onClick={() => handleDelete(s.id)} disabled={pengurus.some(p => p.jabatan_id === s.id)} className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200 disabled:text-gray-400 disabled:cursor-not-allowed"><Trash2 className="h-5 w-5" /></button>
                 </td>
               </tr>
@@ -634,7 +620,7 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
                     <button type="button" onClick={closeModal} className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
                       Batal
                     </button>
-                    <button type="submit" disabled={loading || uploadingImage} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center">
+                    <button type="submit" disabled={loading || uploadingImage} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center">
                       {loading ? 'Menyimpan...' : <><Save className="h-4 w-4 mr-2"/>Simpan</>}
                     </button>
                   </div>

@@ -6,7 +6,7 @@ import HeaderSlider from '@/components/HeaderSlider'
 import QuickLinksSection from '@/components/QuickLinksSection'
 import FAQSection from '@/components/FAQSection'
 import PIKRSection from '@/components/PIKRSection'
-import SponsorsSection from '@/components/SponsorsSection'
+// import SponsorsSection from '@/components/SponsorsSection'
 import KegiatanPreview from '@/components/KegiatanPreview'
 import DutaGenreFAQSection from '@/components/DutaGenreFAQSection'
 
@@ -43,7 +43,7 @@ export default function Home() {
       <HeaderSlider />
 
       {/* Sponsors Section */}
-      <SponsorsSection />
+      {/* <SponsorsSection /> */}
 
       {/* Quick Links Section */}
       <QuickLinksSection />

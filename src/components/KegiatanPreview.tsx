@@ -47,7 +47,7 @@ function Card({ item }: { item: Kegiatan }) {
   return (
     <Link
       href={`/kegiatans?id=${item.id}`}
-      className="group cursor-pointer break-inside-avoid mb-4 md:mb-5 lg:mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 block"
+      className="group cursor-pointer break-inside-avoid mb-4 md:mb-5 lg:mb-6 focus:outline-none focus:ring-2 focus:ring-red-500 block"
       aria-label={`Buka detail kegiatan ${item.judul}`}
     >
       {/* Slider with chosen aspect ratio */}
@@ -65,7 +65,7 @@ function Card({ item }: { item: Kegiatan }) {
             <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
               <h4 className="text-white font-semibold text-sm sm:text-base leading-tight line-clamp-2">{item.judul}</h4>
               {item.tanggal && (
-                <p className="text-[11px] text-blue-200 mt-1">{item.tanggal}</p>
+                <p className="text-[11px] text-red-200 mt-1">{item.tanggal}</p>
               )}
               {item.deskripsi && (
                 <p className="mt-1.5 text-xs sm:text-sm text-gray-100/90 line-clamp-2 whitespace-pre-line">{item.deskripsi}</p>
@@ -154,7 +154,7 @@ export default function KegiatanPreview() {
           </div>
           <Link
             href="/kegiatans"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 md:px-5 py-2 text-sm md:text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 w-full sm:w-auto whitespace-nowrap"
+            className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 md:px-5 py-2 text-sm md:text-base font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 w-full sm:w-auto whitespace-nowrap"
           >
             see more
           </Link>
@@ -162,7 +162,7 @@ export default function KegiatanPreview() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500" />
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-red-200 dark:border-red-900 border-t-red-600 dark:border-t-red-500" />
           </div>
         ) : error ? (
           <p className="text-center text-sm text-red-600 dark:text-red-400">{error}</p>

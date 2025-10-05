@@ -51,14 +51,14 @@ export function ThemeToggle() {
                     }}
                     className={`w-full flex items-center px-4 py-2 text-sm transition-colors duration-200 ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                        ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     <Icon className="w-4 h-4 mr-3" />
                     <span className="flex-1 text-left">{themeOption.label}</span>
                     {isActive && (
-                      <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                      <div className="w-2 h-2 bg-red-600 dark:bg-red-400 rounded-full" />
                     )}
                   </button>
                 )

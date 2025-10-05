@@ -17,7 +17,6 @@ export interface DutaGenreWinner {
   category_id: number
   nama: string
   gender?: 'putra' | 'putri' | 'duo'
-  asal?: string
   instagram?: string
   periode?: string
   image_url?: string
@@ -68,7 +67,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
       .filter(w => {
         if (!q) return true
         const catTitle = catById.get(w.category_id)?.title || ''
-        const hay = `${w.nama} ${catTitle} ${w.asal ?? ''} ${w.instagram ?? ''}`.toLowerCase()
+        const hay = `${w.nama} ${catTitle} ${w.instagram ?? ''}`.toLowerCase()
         return hay.includes(q)
       })
   }, [winners, activePeriode, query, catById, selectedCategoryId, genderFilter])
@@ -132,7 +131,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h4 className="font-semibold text-white text-sm sm:text-base leading-tight break-words whitespace-normal">{w.nama}</h4>
-                <p className="text-[11px] mt-1 text-blue-200 truncate">{cat.title}</p>
+                <p className="text-[11px] mt-1 text-red-200 truncate">{cat.title}</p>
               </div>
             </div>
 
@@ -169,7 +168,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
         <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words whitespace-normal">{w.nama}</h4>
         <p className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 mt-0.5 truncate">{cat.title}</p>
       </div>
-      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-blue-200/60 dark:ring-blue-800/40 transition-[ring]" />
+      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 group-focus:ring-2 group-focus-within:ring-2 ring-red-200/60 dark:ring-red-800/40 transition-[ring]" />
     </article>
   )
 
@@ -213,7 +212,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
         <div className="text-left sm:text-left">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Periode <span className="font-semibold text-gray-800 dark:text-gray-100">{activePeriode}</span></p>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 dark:from-blue-500 dark:to-indigo-600 rounded-full mt-3" />
+          <div className="w-24 h-1 bg-gradient-to-r from-red-400 to-red-600 dark:from-red-500 dark:to-red-600 rounded-full mt-3" />
         </div>
 
         <div className="flex-1 sm:flex-initial flex flex-col sm:flex-row items-stretch gap-3 w-full sm:w-auto">
@@ -223,7 +222,7 @@ export const DutaGenre: React.FC<DutaGenreProps> = ({ title, periode, categories
               aria-label="Cari pemenang Duta GenRe"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari nama, kategori, atau asal..."
+              placeholder="Cari nama atau kategori..."
               className="bg-transparent outline-none text-sm text-gray-700 dark:text-gray-200 w-full"
             />
           </label>

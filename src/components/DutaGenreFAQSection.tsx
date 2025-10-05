@@ -77,7 +77,7 @@ const FAQAccordion: React.FC = () => {
           <div
             key={item.id}
             className={`bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-lg dark:hover:shadow-2xl ${
-              isOpen ? 'shadow-xl dark:shadow-2xl ring-1 ring-blue-500/20' : 'hover:border-gray-300/50 dark:hover:border-gray-600/50'
+              isOpen ? 'shadow-xl dark:shadow-2xl ring-1 ring-red-500/20' : 'hover:border-gray-300/50 dark:hover:border-gray-600/50'
             }`}
           >
             <button
@@ -86,15 +86,15 @@ const FAQAccordion: React.FC = () => {
               aria-expanded={isOpen}
               aria-controls={`faq-answer-${item.id}`}
             >
-              <span className="font-semibold text-gray-900 dark:text-white text-lg transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 pr-4">
+              <span className="font-semibold text-gray-900 dark:text-white text-lg transition-colors duration-300 group-hover:text-red-600 dark:group-hover:text-red-400 pr-4">
                 {item.question}
               </span>
               <span className={`transition-all duration-500 ease-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
                 <ChevronDown
                   className={`w-5 h-5 transition-colors duration-300 ${
                     isOpen
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-400 dark:text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-400'
                   }`}
                 />
               </span>
@@ -127,7 +127,7 @@ const DutaGenreFAQSection: React.FC = () => {
           {/* LEFT: Header stays here, Image below it */}
           <div className="order-1 lg:order-1 flex flex-col gap-8">
             <div className="mb-0">
-              <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium mb-6">
+              <div className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-medium mb-6">
                 🎖️ Duta GenRe FAQ
               </div>
               <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">

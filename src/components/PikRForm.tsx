@@ -177,7 +177,7 @@ export function PikRForm() {
         {/* Header */}
         <div className="mb-7">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Formulir Pendaftaran PIK-R
+            Formulir Pendataan PIK-R
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
             Isi formulir berikut untuk Pendataan anggota PIK-R Se-Kota Bengkulu
@@ -191,7 +191,7 @@ export function PikRForm() {
             animate={{ opacity: 1, y: 0 }}
             className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${
               message.type === 'success' 
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-900/50' 
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-100 dark:border-red-900/50' 
                 : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-100 dark:border-red-900/50'
             }`}
           >
@@ -217,7 +217,7 @@ export function PikRForm() {
                 name="nama"
                 value={formData.nama}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
                 required
               />
             </div>
@@ -233,7 +233,7 @@ export function PikRForm() {
                 value={formData.ttl}
                 onChange={handleInputChange}
                 placeholder="Contoh: Bengkulu, 01 Januari 2000"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ export function PikRForm() {
                 name="asal_pikr"
                 value={formData.asal_pikr}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
                 required
               />
             </div>
@@ -266,7 +266,7 @@ export function PikRForm() {
                 value={formData.alamat_lengkap}
                 onChange={handleInputChange}
                 placeholder="Contoh: Jl. Melati No. 12, RT 01/RW 02, Kel. Kebun Bunga, Kec. Selebar, Kota Bengkulu, Bengkulu"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
                 required
               />
             </div>
@@ -285,7 +285,7 @@ export function PikRForm() {
                 value={formData.tlpn}
                 onChange={handleInputChange}
                 placeholder="Contoh: 08123456789"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
               />
             </div>
 
@@ -300,7 +300,7 @@ export function PikRForm() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Contoh: nama@email.com"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
               />
             </div>
           </div>
@@ -317,7 +317,7 @@ export function PikRForm() {
               value={formData.jabatan_pikr}
               onChange={handleInputChange}
               placeholder="Contoh: Ketua, Sekretaris, Bendahara"
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 dark:focus:border-red-400 transition-all duration-200"
               required
             />
           </div>
@@ -338,7 +338,7 @@ export function PikRForm() {
                   accept="image/*"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <div className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-xl border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200 cursor-pointer">
+                <div className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-xl border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 hover:border-red-500 dark:hover:border-red-400 transition-colors duration-200 cursor-pointer">
                   <div className="text-center">
                     <div className="flex justify-center mb-2">
                       <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -378,7 +378,7 @@ export function PikRForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full md:w-auto px-7 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full md:w-auto px-7 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">

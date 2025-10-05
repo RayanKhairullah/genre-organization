@@ -83,7 +83,7 @@ export function FormControlManager({ formControl, onUpdate }: FormControlManager
         <AdminLogo size="sm" />
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Kontrol Formulir</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Atur jadwal ketersediaan formulir pendaftaran PIK-R untuk publik.</p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Atur jadwal ketersediaan formulir Pendataan PIK-R untuk publik.</p>
         </div>
       </div>
 

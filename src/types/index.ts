@@ -14,11 +14,6 @@ export interface StrukturJabatan {
 export interface Pengurus {
   id: number
   nama: string
-  ttl?: string
-  jabatan_pengurus?: string
-  asal_pikr?: string
-  tlpn?: string
-  email?: string
   instagram?: string
   image_url?: string
   jabatan_id: number
@@ -71,7 +66,6 @@ export interface DutaGenreWinner {
   category_id: number
   nama: string
   gender?: 'putra' | 'putri' | 'duo'
-  asal?: string
   instagram?: string
   image_url?: string
   periode: string
