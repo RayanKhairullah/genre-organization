@@ -25,51 +25,64 @@ export default function AdminDashboard() {
 
   const fetchAllData = async () => {
     try {
-      const logErr = (label: string, err: any) => {
+      const logErr = (label: string, err: unknown) => {
         if (!err) return
-        console.error(`${label} error:`, {
-          name: err.name,
-          message: err.message,
-          code: err.code,
-          details: err.details,
-          hint: err.hint,
-          stack: err.stack,
-        })
+        if (typeof err === 'object' && err !== null && 'message' in err) {
+          const e = err as { name?: string; message?: string; code?: string; details?: string; hint?: string; stack?: string }
+          console.error(`${label} error:`, {
+            name: e.name,
+            message: e.message,
+            code: e.code,
+            details: e.details,
+            hint: e.hint,
+            stack: e.stack,
+          })
+        } else {
+          console.error(`${label} error:`, err)
+        }
       }
 
+      const formPromise = supabase.from('form_control').select('*').maybeSingle()
+      const pengurusPromise = supabase.from('pengurus').select('*').order('periode', { ascending: false })
+      const strukturPromise = supabase.from('struktur_jabatan').select('*').order('urutan')
+      const submissionsPromise = supabase.from('pik_r_submissions').select('*').order('submitted_at', { ascending: false })
+      const kegiatanPromise = supabase.from('kegiatan').select('*').order('created_at', { ascending: false })
+      const catPromise = supabase.from('duta_genre_categories').select('*').order('order', { ascending: true })
+      const winnerPromise = supabase.from('duta_genre_winners').select('*').order('created_at', { ascending: false })
+
       const [
-        formRes,
-        pengurusRes,
-        strukturRes,
-        submissionsRes,
-        kegiatanRes,
-        catRes,
-        winnerRes,
+        { data: formData, error: formError },
+        { data: pengurusData, error: pengurusError },
+        { data: strukturData, error: strukturError },
+        { data: submissionsData, error: submissionsError },
+        { data: kegiatanData, error: kegiatanError },
+        { data: catData, error: catError },
+        { data: winnerData, error: winnerError },
       ] = await Promise.all([
-        supabase.from('form_control').select('*').maybeSingle(),
-        supabase.from('pengurus').select('*').order('periode', { ascending: false }),
-        supabase.from('struktur_jabatan').select('*').order('urutan'),
-        supabase.from('pik_r_submissions').select('*').order('submitted_at', { ascending: false }),
-        supabase.from('kegiatan').select('*').order('created_at', { ascending: false }),
-        supabase.from('duta_genre_categories').select('*').order('order', { ascending: true }),
-        supabase.from('duta_genre_winners').select('*').order('created_at', { ascending: false }),
+        formPromise,
+        pengurusPromise,
+        strukturPromise,
+        submissionsPromise,
+        kegiatanPromise,
+        catPromise,
+        winnerPromise,
       ])
 
-      logErr('form_control', (formRes as any).error)
-      logErr('pengurus', (pengurusRes as any).error)
-      logErr('struktur_jabatan', (strukturRes as any).error)
-      logErr('pik_r_submissions', (submissionsRes as any).error)
-      logErr('kegiatan', (kegiatanRes as any).error)
-      logErr('duta_genre_categories', (catRes as any).error)
-      logErr('duta_genre_winners', (winnerRes as any).error)
+      logErr('form_control', formError)
+      logErr('pengurus', pengurusError)
+      logErr('struktur_jabatan', strukturError)
+      logErr('pik_r_submissions', submissionsError)
+      logErr('kegiatan', kegiatanError)
+      logErr('duta_genre_categories', catError)
+      logErr('duta_genre_winners', winnerError)
 
-      setFormControl((formRes as any).data || null)
-      setPengurus((pengurusRes as any).data || [])
-      setStrukturJabatan((strukturRes as any).data || [])
-      setSubmissions((submissionsRes as any).data || [])
-      setKegiatan((kegiatanRes as any).data || [])
-      setDutaCats((catRes as any).data || [])
-      setDutaWinners((winnerRes as any).data || [])
+      setFormControl(formData || null)
+      setPengurus(pengurusData || [])
+      setStrukturJabatan(strukturData || [])
+      setSubmissions(submissionsData || [])
+      setKegiatan(kegiatanData || [])
+      setDutaCats(catData || [])
+      setDutaWinners(winnerData || [])
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {

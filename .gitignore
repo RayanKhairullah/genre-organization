@@ -20,6 +20,8 @@
 # production
 /build
 
+/quick-db-setup.sql
+
 # misc
 .DS_Store
 *.pem

@@ -66,6 +66,7 @@ export interface DutaGenreWinner {
   category_id: number
   nama: string
   gender?: 'putra' | 'putri' | 'duo'
+  asal?: string
   instagram?: string
   image_url?: string
   periode: string
@@ -118,12 +119,8 @@ export interface AssetCollection {
   formQuestions: string | StaticImageData
   genre_bengkulu_logo: string | StaticImageData
   genrebackground: string | StaticImageData
-  peach: string | StaticImageData
-  specialrainbow: string | StaticImageData
-  strawberry: string | StaticImageData
-  vanilla: string | StaticImageData
+  salamgenre: string | StaticImageData
   drink: string
-  drink2: string
   faq_image: string
   arrow_icon: string
   arrow_icon_white: string

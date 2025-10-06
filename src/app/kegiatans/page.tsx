@@ -4,12 +4,12 @@ import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
 import KegiatanList from '@/components/KegiatanList'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import { supabase, type Kegiatan } from '@/lib/supabase'
 import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 
-export default function KegiatansPage() {
+function KegiatansPageInner() {
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
 
@@ -27,6 +27,20 @@ export default function KegiatansPage() {
       </section>
       <Footer />
     </div>
+  )
+}
+
+export default function KegiatansPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-red-200 dark:border-red-900 border-t-red-600 dark:border-t-red-500" />
+        </div>
+      }
+    >
+      <KegiatansPageInner />
+    </Suspense>
   )
 }
 
@@ -74,7 +88,7 @@ function KegiatanDetailInline({ id }: { id: string }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500" />
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-red-200 dark:border-red-900 border-t-red-600 dark:border-t-red-500" />
       </div>
     )
   }
@@ -84,7 +98,7 @@ function KegiatanDetailInline({ id }: { id: string }) {
         <p className="text-sm text-red-600 dark:text-red-400 mb-4">{error || 'Kegiatan tidak ditemukan.'}</p>
         <button
           onClick={() => router.push('/kegiatans')}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           aria-label="Kembali ke daftar kegiatan"
           title="Kembali ke daftar kegiatan"
         >
@@ -101,7 +115,7 @@ function KegiatanDetailInline({ id }: { id: string }) {
     <article className="max-w-6xl mx-auto">
       <button
         onClick={() => router.push('/kegiatans')}
-        className="mb-6 inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="mb-6 inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         aria-label="Kembali ke daftar kegiatan"
         title="Kembali ke daftar kegiatan"
       >

@@ -112,7 +112,7 @@ export function PengurusView({ pengurus }: OrganizationStructureProps) {
             alt={person.nama}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03] group-focus:scale-[1.03] group-focus-within:scale-[1.03] active:scale-[1.02]"
+            className="relative z-0 object-contain sm:object-cover object-top transition-transform duration-300 group-hover:scale-[1.03] group-focus:scale-[1.03] group-focus-within:scale-[1.03] active:scale-[1.02]"
             onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               try {
                 (e.currentTarget as HTMLImageElement).src = fallback

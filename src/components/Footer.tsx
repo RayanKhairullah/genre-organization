@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { MapPin, Phone, Instagram, Heart, MailIcon } from 'lucide-react'
+import { MapPin, Phone, Instagram, MailIcon } from 'lucide-react'
 import Image from 'next/image'
 import { assets } from '@/assets/assets'
 
@@ -22,7 +22,7 @@ export function Footer() {
                   priority
                 />
               </div>
-              <span className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+              <span className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300">
                 GenRe Kota Bengkulu
               </span>
             </Link>

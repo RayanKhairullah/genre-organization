@@ -52,7 +52,7 @@ const HeaderSlider: React.FC = () => {
       secondaryButton: { text: 'Pengurus', href: '/pengurus' },
       icon: (
         <Image
-          src={assets.genre_bengkulu_logo}
+          src={assets.salamgenre}
           alt="Ikon Masa Depan Cerah"
           width={350}
           height={100}
