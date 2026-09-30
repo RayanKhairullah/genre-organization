@@ -6,6 +6,18 @@ import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { AdminLogo } from '@/components/admin/AdminLogo'
+import { Eye, EyeOff } from 'lucide-react'
+import {
+  checkClientRateLimit,
+  recordFailedAttempt,
+  clearLoginAttempts,
+  formatLockoutTime,
+  isValidEmail,
+  sanitizeErrorMessage,
+  logLoginAttempt,
+  SECURITY_CONFIG,
+  type RateLimitResult,
+} from '@/lib/security'
 
 export default function AdminLayout({
   children,
@@ -89,23 +101,97 @@ export default function AdminLayout({
 function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [rateLimit, setRateLimit] = useState<RateLimitResult>({
+    isAllowed: true,
+    attemptsRemaining: SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS,
+  })
+
+  // Update lockout timer
+  useEffect(() => {
+    if (rateLimit.lockoutTimeRemaining && rateLimit.lockoutTimeRemaining > 0) {
+      const timer = setInterval(() => {
+        const newRateLimit = checkClientRateLimit(email)
+        setRateLimit(newRateLimit)
+        
+        if (newRateLimit.isAllowed) {
+          setError(null)
+        }
+      }, 1000)
+      
+      return () => clearInterval(timer)
+    }
+  }, [rateLimit.lockoutTimeRemaining, email])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
+    // Basic input validation
+    if (!email || !password) {
+      setError('Email dan password harus diisi')
+      setLoading(false)
+      return
+    }
+
+    // Email format validation
+    if (!isValidEmail(email)) {
+      setError('Format email tidak valid')
+      setLoading(false)
+      return
+    }
+
+    // Check client-side rate limiting
+    const rateLimitCheck = checkClientRateLimit(email)
+    if (!rateLimitCheck.isAllowed) {
+      setRateLimit(rateLimitCheck)
+      if (rateLimitCheck.lockoutTimeRemaining) {
+        setError(`Terlalu banyak percobaan login gagal. Akun dikunci selama ${formatLockoutTime(rateLimitCheck.lockoutTimeRemaining)}`)
+      }
+      setLoading(false)
+      return
+    }
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (authError) {
+        // Record failed attempt
+        const newRateLimit = recordFailedAttempt(email)
+        setRateLimit(newRateLimit)
+
+        // Log to database (optional)
+        await logLoginAttempt(email, false, sanitizeErrorMessage(authError))
+
+        // Show user-friendly error
+        if (newRateLimit.lockoutTimeRemaining) {
+          setError(`Terlalu banyak percobaan login gagal. Akun dikunci selama 15 menit.`)
+        } else {
+          setError(`Email atau password salah. Sisa ${newRateLimit.attemptsRemaining} percobaan.`)
+        }
+        
+        throw authError
+      }
+
+      // Success - clear attempts and log
+      clearLoginAttempts(email)
+      await logLoginAttempt(email, true)
+      
+      // Reset state
+      setRateLimit({
+        isAllowed: true,
+        attemptsRemaining: SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS,
+      })
+      
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      // Error already handled above
+      console.error('Login error:', error)
     } finally {
       setLoading(false)
     }
@@ -146,26 +232,64 @@ function AdminLogin() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div className="relative mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2.5 px-4 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              disabled={loading || !rateLimit.isAllowed}
+              className="group relative w-full flex justify-center py-2.5 px-4 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </>
+              ) : rateLimit.lockoutTimeRemaining ? (
+                `Dikunci (${formatLockoutTime(rateLimit.lockoutTimeRemaining)})`
+              ) : (
+                'Sign in'
+              )}
             </button>
+          </div>
+          
+          {rateLimit.attemptsRemaining < SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS && rateLimit.attemptsRemaining > 0 && (
+            <div className="text-xs text-amber-600 dark:text-amber-400 text-center">
+              ⚠️ Sisa {rateLimit.attemptsRemaining} percobaan login
+            </div>
+          )}
+          
+          <div className="text-xs text-gray-500 dark:text-gray-400 text-center space-y-1">
+            <p>🔒 Dilindungi dengan rate limiting dan auto-lockout</p>
+            <p className="text-[10px]">Maksimal {SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS} percobaan per 15 menit</p>
           </div>
         </form>
       </div>
