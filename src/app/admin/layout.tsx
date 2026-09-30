@@ -157,7 +157,7 @@ function AdminLogin() {
 
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(), // Add trim() to prevent trailing space errors
         password,
       })
 
@@ -176,7 +176,8 @@ function AdminLogin() {
           setError(`Email atau password salah. Sisa ${newRateLimit.attemptsRemaining} percobaan.`)
         }
         
-        throw authError
+        // Return instead of throwing to prevent the Next.js console/crash overlay
+        return 
       }
 
       // Success - clear attempts and log
@@ -190,8 +191,9 @@ function AdminLogin() {
       })
       
     } catch (error) {
-      // Error already handled above
-      console.error('Login error:', error)
+      // This will now only catch genuine code/network exceptions
+      console.error('Unexpected login error:', error)
+      setError('Terjadi kesalahan pada sistem. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }
@@ -201,8 +203,8 @@ function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-md w-full space-y-6 p-6">
         <div>
-          <h2 className="mt-2 text-center text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">Admin Login</h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">Masuk ke dashboard admin PIK-R</p>
+          <h2 className="mt-2 text-center text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">GenRe Kota Bengkulu</h2>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">Masuk ke dashboard admin</p>
         </div>
         
         <form className="mt-6 space-y-4" onSubmit={handleLogin}>
@@ -279,17 +281,6 @@ function AdminLogin() {
                 'Sign in'
               )}
             </button>
-          </div>
-          
-          {rateLimit.attemptsRemaining < SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS && rateLimit.attemptsRemaining > 0 && (
-            <div className="text-xs text-amber-600 dark:text-amber-400 text-center">
-              ⚠️ Sisa {rateLimit.attemptsRemaining} percobaan login
-            </div>
-          )}
-          
-          <div className="text-xs text-gray-500 dark:text-gray-400 text-center space-y-1">
-            <p>🔒 Dilindungi dengan rate limiting dan auto-lockout</p>
-            <p className="text-[10px]">Maksimal {SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS} percobaan per 15 menit</p>
           </div>
         </form>
       </div>

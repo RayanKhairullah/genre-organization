@@ -96,18 +96,6 @@ export function Footer() {
                 </a>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                <a
-                  href="https://wa.me/6283157664115"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 hover:underline"
-                  aria-label="Hubungi via WhatsApp +62 812-8888-8888"
-                >
-                  Nabila Putri Rasya
-                </a>
-              </div>
-              <div className="flex items-center space-x-3">
                 <MailIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                 <a
                   href="mailto:forumgenrekotabengkulu@gmail.com"
