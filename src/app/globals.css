@@ -92,3 +92,19 @@ p { line-height: 1.65; }
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-thumb { background: color-mix(in oklab, #000 20%, #cfd1d6); border-radius: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
+
+/* Hide scrollbar for mobile horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Extra small screen breakpoint helper */
+@media (min-width: 475px) {
+  .xs\:inline {
+    display: inline;
+  }
+}

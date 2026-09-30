@@ -107,21 +107,21 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Dashboard Stats - Mobile Optimized */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
-          <div className="p-5">
+          <div className="p-3 sm:p-4 lg:p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl">📝</div>
+                <div className="text-xl sm:text-2xl">📝</div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  <dt className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                     Total Pendaftar
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <dd className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100">
                     {submissions.length}
                   </dd>
                 </dl>
@@ -131,17 +131,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
-          <div className="p-5">
+          <div className="p-3 sm:p-4 lg:p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl">👥</div>
+                <div className="text-xl sm:text-2xl">👥</div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  <dt className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                     Total Pengurus
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <dd className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100">
                     {pengurus.length}
                   </dd>
                 </dl>
@@ -151,17 +151,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
-        <div className="p-5">
+        <div className="p-3 sm:p-4 lg:p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl">🏆</div>
+                <div className="text-xl sm:text-2xl">🏆</div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  <dt className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                     Total Duta GenRe
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <dd className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100">
                     {dutaWinners.length}
                   </dd>
                 </dl>
@@ -171,17 +171,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
-          <div className="p-5">
+          <div className="p-3 sm:p-4 lg:p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl">🖼️</div>
+                <div className="text-xl sm:text-2xl">🖼️</div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  <dt className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                     Total Post Kegiatan
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <dd className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100">
                     {kegiatan.length}
                   </dd>
                 </dl>
@@ -190,23 +190,23 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm">
-          <div className="p-5">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm col-span-2 sm:col-span-3 lg:col-span-1">
+          <div className="p-3 sm:p-4 lg:p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl">
+                <div className="text-xl sm:text-2xl">
                   {formControl?.buka && formControl?.tutup ? 
                     (new Date() >= new Date(formControl.buka) && new Date() <= new Date(formControl.tutup) ? '🟢' : '🔴') 
                     : '🔴'
                   }
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                  <dt className="text-[10px] sm:text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                     Status Formulir
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <dd className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-gray-100">
                     {formControl?.buka && formControl?.tutup ? 
                       (new Date() >= new Date(formControl.buka) && new Date() <= new Date(formControl.tutup) ? 'Aktif' : 'Tutup') 
                       : 'Tutup'
@@ -219,10 +219,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - Mobile Optimized with Horizontal Scroll */}
       <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-        <div className="px-3 pt-3">
-          <nav className="flex flex-wrap gap-2" aria-label="Tabs">
+        <div className="px-2 sm:px-3 pt-2 sm:pt-3">
+          {/* Mobile: Horizontal scrollable tabs */}
+          <nav className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-0.5" aria-label="Tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -230,18 +231,18 @@ export default function AdminDashboard() {
                 className={`${
                   activeTab === tab.id
                     ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700'
-                } inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors`}
+                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                } inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0`}
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                <span className="text-sm sm:text-base">{tab.icon}</span>
+                <span className="hidden xs:inline sm:inline">{tab.label}</span>
               </button>
             ))}
           </nav>
         </div>
 
         {/* Tab Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-3 sm:p-4 lg:p-6">
           {activeTab === 'form-control' && (
             <FormControlManager 
               formControl={formControl} 

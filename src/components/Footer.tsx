@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { MapPin, Phone, Instagram, MailIcon } from 'lucide-react'
+import { MapPin, Instagram, MailIcon } from 'lucide-react'
 import Image from 'next/image'
 import { assets } from '@/assets/assets'
 

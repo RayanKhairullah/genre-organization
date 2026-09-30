@@ -356,58 +356,92 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
   const renderPengurusTab = () => (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl">
-      <div className="p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-stretch gap-3 w-full sm:w-auto">
-          <div className="relative">
-            <select value={selectedPeriode} onChange={e => setSelectedPeriode(e.target.value)} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {periodes.map(p => <option key={p} value={p}>{p === 'all' ? 'Semua Periode' : p}</option>)}
-            </select>
-            <ChevronsUpDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-          <div className="relative">
-            <select value={selectedRoleType} onChange={e => setSelectedRoleType(e.target.value as 'all' | 'administrator' | 'member')} className="appearance-none w-full sm:w-auto bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
-              <option value="all">Semua Tipe</option>
-              <option value="administrator">Administrator</option>
-              <option value="member">Member</option>
-            </select>
-            <ChevronsUpDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+      {/* Mobile-Optimized Filters & Actions */}
+      <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 space-y-3">
+        {/* Row 1: Search */}
+        <div className="w-full">
           <input
             type="text"
             value={searchPengurus}
             onChange={e => setSearchPengurus(e.target.value)}
             placeholder="Cari nama, instagram, jabatan..."
-            className="w-full sm:w-64 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
+            className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <div className="flex items-center gap-2">
-            <button onClick={exportPengurusCSV} className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Export CSV</button>
-            <button onClick={exportPengurusXLSX} className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Export XLSX</button>
+        </div>
+
+        {/* Row 2: Filters */}
+        <div className="flex flex-wrap gap-2">
+          {/* Periode Filter */}
+          <div className="relative flex-1 min-w-[140px]">
+            <select 
+              value={selectedPeriode} 
+              onChange={e => setSelectedPeriode(e.target.value)} 
+              className="appearance-none w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {periodes.map(p => <option key={p} value={p}>{p === 'all' ? 'Semua Periode' : p}</option>)}
+            </select>
+            <ChevronsUpDown className="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+
+          {/* Role Type Filter */}
+          <div className="relative flex-1 min-w-[140px]">
+            <select 
+              value={selectedRoleType} 
+              onChange={e => setSelectedRoleType(e.target.value as 'all' | 'administrator' | 'member')} 
+              className="appearance-none w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="all">Semua Tipe</option>
+              <option value="administrator">Administrator</option>
+              <option value="member">Member</option>
+            </select>
+            <ChevronsUpDown className="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {selectedPengurusIds.size > 0 && (
-            <button
-              onClick={() => handleBulkDelete('pengurus', 'selected')}
-              className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-              disabled={loading}
-            >
-              <Trash2 className="w-4 h-4 mr-2" /> Hapus Terpilih ({selectedPengurusIds.size})
-            </button>
-          )}
-          {false && filteredPengurus.length > 0 && (
-            <button
-              onClick={() => handleBulkDelete('pengurus', 'all')}
-              className="flex items-center px-3 py-2 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 rounded-lg hover:bg-red-100 text-sm"
-              disabled={loading}
-            >
-              <Trash2 className="w-4 h-4 mr-2" /> Hapus Semua (Filter)
-            </button>
-          )}
-          <button onClick={() => openModal()} className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-            <Plus className="w-5 h-5 mr-2" /> Tambah Pengurus
+
+        {/* Row 3: Export Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={exportPengurusCSV} 
+            className="flex-1 sm:flex-initial px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs sm:text-sm font-medium bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
+          >
+            <span className="hidden sm:inline">Export CSV</span>
+            <span className="sm:hidden">CSV</span>
+          </button>
+          <button 
+            onClick={exportPengurusXLSX} 
+            className="flex-1 sm:flex-initial px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs sm:text-sm font-medium bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
+          >
+            <span className="hidden sm:inline">Export XLSX</span>
+            <span className="sm:hidden">XLSX</span>
           </button>
         </div>
+
+        {/* Row 4: Bulk Actions (if selected) */}
+        {selectedPengurusIds.size > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleBulkDelete('pengurus', 'selected')}
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors disabled:opacity-50"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4" /> 
+              <span>Hapus ({selectedPengurusIds.size})</span>
+            </button>
+          </div>
+        )}
+
+        {/* Add Button */}
+        <button
+          onClick={() => openModal(null)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+          disabled={loading}
+        >
+          <Plus className="w-5 h-5" />
+          <span>Tambah Pengurus</span>
+        </button>
       </div>
+
+      {/* Table Section */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700/50">
@@ -470,29 +504,45 @@ export function OrganizationManager({ pengurus, strukturJabatan, onUpdate }: Org
 
   const renderStrukturTab = () => (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl">
-       <div className="p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-200 dark:border-gray-700">
-        <input
-          type="text"
-          value={searchStruktur}
-          onChange={e => setSearchStruktur(e.target.value)}
-          placeholder="Cari nama jabatan..."
-          className="w-full sm:w-72 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm"
-        />
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {selectedStrukturIds.size > 0 && (
+      {/* Mobile-Optimized Filters & Actions */}
+      <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 space-y-3">
+        {/* Search */}
+        <div className="w-full">
+          <input
+            type="text"
+            value={searchStruktur}
+            onChange={e => setSearchStruktur(e.target.value)}
+            placeholder="Cari nama jabatan..."
+            className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Bulk Actions (if selected) */}
+        {selectedStrukturIds.size > 0 && (
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleBulkDelete('struktur', 'selected')}
-              className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors disabled:opacity-50"
               disabled={loading}
             >
-              <Trash2 className="w-4 h-4 mr-2" /> Hapus Terpilih ({selectedStrukturIds.size})
+              <Trash2 className="w-4 h-4" />
+              <span>Hapus ({selectedStrukturIds.size})</span>
             </button>
-          )}
-          <button onClick={() => openModal()} className="flex items-center justify-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-            <Plus className="w-5 h-5 mr-2" /> Tambah Jabatan
-          </button>
-        </div>
+          </div>
+        )}
+
+        {/* Add Button */}
+        <button
+          onClick={() => openModal(null)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+          disabled={loading}
+        >
+          <Plus className="w-5 h-5" />
+          <span>Tambah Jabatan</span>
+        </button>
       </div>
+
+      {/* Table Section */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700/50">
